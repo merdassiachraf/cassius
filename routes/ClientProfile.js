@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
 
-router.get("/test", (req, res) => res.json({ msg: "agency  works" }));
+router.get("/test", (req, res) => res.json({ msg: "client profil works" }));
 
 module.exports = router;
