@@ -12,6 +12,6 @@ const agenciesSchema = new Schema({
   agencyEmail: { type: String, required: true },
   agencyPassword: { type: String, required: true },
   date: { type: Date, default: Date.now },
-  avatar: { typre: String , required: true}
+  avatar: { typre: String }
 });
 module.exports = agency = mongoose.model("agency", agenciesSchema);
