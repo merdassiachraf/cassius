@@ -5,7 +5,6 @@ const router = express.Router();
 //Add
 router.post("/", (req, res) => {
   const newagency = new Agency({
-    agencyPicture: req.body.agencyPicture,
     agencyAdress: req.body.agencyAdress,
     agencyState: req.body.agencyState,
     agencyCountry: req.body.agencyCountry,
@@ -13,7 +12,8 @@ router.post("/", (req, res) => {
     agencyPhoneNumber: req.body.agencyPhoneNumber,
     agencyName: req.body.agencyName,
     agencyEmail: req.body.agencyEmail,
-    agencyPassword: req.body.agencyPassword
+    agencyPassword: req.body.agencyPassword,
+    avatar:req.body.avatar
   })
     .save()
     .then((agencies) => res.send(agencies))
