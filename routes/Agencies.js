@@ -2,8 +2,12 @@ const express = require("express");
 const gravatar = require("gravatar");
 const router = express.Router();
 const bycrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const passport = require("passport");
 
 const Agency = require("../models/agenciesModel");
+
+const keys = require("../config/default.js");
 
 router.get("/test", (req, res) => res.json({ msg: "agency  works" }));
 
@@ -65,7 +69,27 @@ router.post("/signin", (req, res) => {
 
     bycrypt.compare(agencyPassword, agency.agencyPassword).then((isMatch) => {
       if (isMatch) {
-        res.json({ msg: "success" });
+        //agency matched
+
+        const payload = {
+          id: agency.id,
+          agencyName: agency.agencyName,
+          avatar: agency.avatar,
+        }; // create jwt payload
+
+        //sign Token
+
+        jwt.sign(
+          payload,
+          keys.secretOrKey,
+          { expiresIn: 36000000 },
+          (err, token) => {
+            res.json({
+              success: true,
+              token: "Bearer " + token,
+            });
+          }
+        );
       } else {
         return res.status(400).json({ errpass: "password incorrect" });
       }
@@ -73,4 +97,13 @@ router.post("/signin", (req, res) => {
   });
 });
 
+///return current agency :private
+
+router.get(
+  "/current",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    res.json(req.agency);
+  }
+);
 module.exports = router;

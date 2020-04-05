@@ -1,14 +1,31 @@
 const express = require("express");
-const bodyParser= require ("body-parser")
+const bodyParser = require("body-parser");
+const passport = require("passport");
+const mongoose=require('mongoose')
 
-const connectDB = require("./config/connectDB");
+const db = require("./config/default").mongoURI;
 
 const app = express();
-//bosy parser middlewear
-app.use(bodyParser.urlencoded({extended:false}))
-app.use(bodyParser.json())
 
-connectDB();
+//bosy parser middlewear
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+// connect to mongodb
+
+mongoose
+  .connect(db,{ useUnifiedTopology: true,useNewUrlParser: true  })
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.log(err));
+
+//passport middlewear
+
+app.use(passport.initialize());
+
+//passport config
+
+require("./config/passport")(passport);
 
 //Define routers
 
@@ -22,6 +39,6 @@ const port = process.env.PORT || 5000;
 
 app.listen(port, (err) => {
   err
-    ? console.log("Can't connect dataBase")
+    ? console.log("Can't connect DataBase")
     : console.log(`dataBase is connected on port ${port}`);
 });
