@@ -23,8 +23,6 @@ app.use("/agencies", require("./routes/Agencies"));
 
 app.use("/clients", require("./routes/Clients"));
 
-app.use("/", require("./routes/defaultRouter"));
-
 
 const port = process.env.PORT || 5000;
 
