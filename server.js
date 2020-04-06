@@ -30,10 +30,8 @@ require("./config/passport")(passport);
 //Define routers
 
 app.use("/posts", require("./routes/Posts"));
-app.use("/agencies", require("./routes/Agencies"));
-app.use("/clients", require("./routes/Clients"));
-app.use("/client_profile", require("./routes/ClientProfile"));
-app.use("/agency_profile", require("./routes/AgencyProfile"));
+app.use("/users", require("./routes/Users"));
+app.use("/profile", require("./routes/Profile"));
 
 const port = process.env.PORT || 5000;
 

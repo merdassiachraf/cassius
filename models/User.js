@@ -2,36 +2,40 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-const agenciesSchema = new Schema({
-  agencyAdress: {
+const usersSchema = new Schema({
+  role: {
     type: String,
     required: true,
   },
-  agencyState: {
+  adress: {
     type: String,
     required: true,
   },
-  agencyCountry: {
+  state: {
     type: String,
     required: true,
   },
-  agencyCountryCode: {
+  country: {
     type: String,
     required: true,
   },
-  agencyPhoneNumber: {
+  countryCode: {
     type: String,
     required: true,
   },
-  agencyName: {
+  phoneNumber: {
+    type: Number,
+    required: true,
+  },
+  name: {
     type: String,
     required: true,
   },
-  agencyEmail: {
+  email: {
     type: String,
     required: true,
   },
-  agencyPassword: {
+  password: {
     type: String,
     required: true,
   },
@@ -40,7 +44,9 @@ const agenciesSchema = new Schema({
     default: Date.now,
   },
   avatar: {
-    typre: String,
+    type: String,
   },
+  dateOfBirth: {
+    type: String  },
 });
-module.exports = agency = mongoose.model("agencies", agenciesSchema);
+module.exports = User = mongoose.model("users", usersSchema);
