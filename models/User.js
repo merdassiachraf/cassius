@@ -7,26 +7,6 @@ const usersSchema = new Schema({
     type: String,
     required: true,
   },
-  adress: {
-    type: String,
-    required: true,
-  },
-  state: {
-    type: String,
-    required: true,
-  },
-  country: {
-    type: String,
-    required: true,
-  },
-  countryCode: {
-    type: String,
-    required: true,
-  },
-  phoneNumber: {
-    type: String,
-    required: true,
-  },
   name: {
     type: String,
     required: true,
@@ -45,8 +25,6 @@ const usersSchema = new Schema({
   },
   avatar: {
     type: String,
-  },
-  dateOfBirth: {
-    type: String  },
+  }
 });
 module.exports = User = mongoose.model("users", usersSchema);

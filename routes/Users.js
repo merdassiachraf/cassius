@@ -39,17 +39,11 @@ router.post("/signup", (req, res) => {
         });
 
         const newUser = new User({
-          adress: req.body.adress,
-          state: req.body.state,
-          country: req.body.country,
-          countryCode: req.body.countryCode,
-          phoneNumber: req.body.phoneNumber,
           name: req.body.name,
           email: req.body.email,
           role: req.body.role,
           avatar,
           password: req.body.password,
-          dateOfBirth: req.body.dateOfBirth,
         });
         bycrypt.genSalt(10, (err, salt) => {
           bycrypt.hash(newUser.password, salt, (err, hash) => {
@@ -97,10 +91,9 @@ router.post("/signin", (req, res) => {
 
         const payload = {
           id: user.id,
-          adress: user.adress,
           avatar: user.avatar,
           name: user.name,
-          state: user.state,
+          email:user.email
         };
 
         //sign Token
