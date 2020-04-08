@@ -3,6 +3,16 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const PostsSchema = new Schema({
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: "users",
+  },
+  name: {
+    type: String,
+  },
+  avatar: {
+    type: String,
+  },
   brand: {
     type: String,
     required: true,
@@ -19,8 +29,12 @@ const PostsSchema = new Schema({
     type: String,
     required: true,
   },
+  pricePerDay: {
+    type: Number,
+    required: true,
+  },
   carPictures: {
-    carPicture1: { type: String, required: true },
+    carPicture1: { type: String },
     carPicture2: { type: String },
     carPicture3: { type: String },
     carPicture4: { type: String },
@@ -31,21 +45,9 @@ const PostsSchema = new Schema({
     carPicture9: { type: String },
     carPicture10: { type: String },
   },
-  state: {
-    type: String,
-    required: true,
-  },
-  country: {
-    type: String,
-    required: true,
-  },
-  pricePerDay: {
-    type: Number,
-    required: true,
-  },
-  agencyName: {
-    type: String,
-    required: true,
+  date: {
+    type: Date,
+    default: Date.now,
   },
 });
 module.exports = Post = mongoose.model("post", PostsSchema);

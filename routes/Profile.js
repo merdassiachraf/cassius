@@ -162,7 +162,7 @@ router.post(
 
       /// Add to adress array
 
-      profile.contactInformation.unshift(newContactInformation);
+      profile.contactInformation.push(newContactInformation);
       profile.save()
         .then((profile) => res.json(profile))
         .catch((err) => res.json(err));
@@ -182,7 +182,7 @@ router.delete(
           .map((contact) => contact.id)
           .indexOf(req.params.contact_id);
 
-        profile.contactInformation.concat(removeContactInformation, 1);
+        profile.contactInformation.splice(removeContactInformation, 1);
 
         profile.save().then((profile) => res.json(profile));
       })
@@ -197,7 +197,7 @@ router.delete(
   passport.authenticate("jwt", { session: false }),
   (res, req) => {
     Profile.findOneAndRemove({ user: req.user.id }).then(() => {
-      User.findOneAndRemove({ _id: req.user_id }).then(() =>
+      User.findOneAndRemove({ _id: req.user.id }).then(() =>
         res.json({ success: true })
       );
     });
