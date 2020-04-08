@@ -11,26 +11,23 @@ const ProfileSchema = new Schema({
     required: true,
     max: 40,
   },
-  country: {
-    type: String,
-    required: true,
-  },
-  countryCode: {
-    type: String,
-    required: true,
-  },
-  phoneNumber: {
-    type: String,
-    required: true,
-  },
-  adress: {
-    type: String,
-    required: true,
-  },
-  state: {
-    type: String,
-    required: true,
-  },
+  contactInformation: [
+   { country: {
+      type: String,
+    },
+    countryCode: {
+      type: String,
+    },
+    phoneNumber: {
+      type: String,
+    },
+    adress: {
+      type: String,
+    },
+    state: {
+      type: String,
+    }}
+  ],
   dateOfBirth: {
     type: String,
   },
