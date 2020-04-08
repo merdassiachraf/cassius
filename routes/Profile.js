@@ -1,12 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const mongoose =require('mongoose')
 
-const Profile = require("../models/profile");
-const User = require("../models/user");
-
-
+const Profile = require("../models/Profile");
+const User= require("../models/User")
 //validation
 const validateProfileInput = require("../validation/profile");
 const validateAdressInput = require("../validation/adress");
@@ -166,9 +163,7 @@ router.post(
       /// Add to adress array
 
       profile.contactInformation.unshift(newContactInformation);
-
-      profile
-        .save()
+      profile.save()
         .then((profile) => res.json(profile))
         .catch((err) => res.json(err));
     });
@@ -187,7 +182,7 @@ router.delete(
           .map((contact) => contact.id)
           .indexOf(req.params.contact_id);
 
-        profile.contactInformation.splice(removeContactInformation, 1);
+        profile.contactInformation.concat(removeContactInformation, 1);
 
         profile.save().then((profile) => res.json(profile));
       })
@@ -201,10 +196,8 @@ router.delete(
   "/",
   passport.authenticate("jwt", { session: false }),
   (res, req) => {
-
-    profile.findOneAndRemove({ user: req.user.id }).then(() => {
-
-      User.findOneAndRemove({ _id: req.id }).then(() =>
+    Profile.findOneAndRemove({ user: req.user.id }).then(() => {
+      User.findOneAndRemove({ _id: req.user_id }).then(() =>
         res.json({ success: true })
       );
     });
