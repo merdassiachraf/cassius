@@ -100,12 +100,14 @@ router.post(
     const profileFields = {};
     role = req.user.role;
     profileFields.user = req.user.id;
-    if (req.body.handle) profileFields.handle = req.body.handle;
-    if (role === "Client") {
-      if (req.body.dateOfBirth)
-        profileFields.dateOfBirth = req.body.dateOfBirth;
-    } else if (role === "Agency") {
-      delete profileFields.dateOfBirth;
+    if (role === "Client" || role === "Agency") {
+      if (req.body.handle) profileFields.handle = req.body.handle;
+      if (role === "Client") {
+        if (req.body.dateOfBirth)
+          profileFields.dateOfBirth = req.body.dateOfBirth;
+      } else if (role === "Agency") {
+        delete profileFields.dateOfBirth;
+      }
     } else {
       errors.wrongRole = "choose a wrong role";
       res.status(400).json(errors);
@@ -179,7 +181,7 @@ router.post(
             .then((profile) => res.json(profile))
             .catch((err) => res.json(err));
         } else if (role === "Client") {
-          profile.contactInformation.splice(0,1,newContactInformation);
+          profile.contactInformation.splice(0, 1, newContactInformation);
           profile
             .save()
             .then((profile) => res.json(profile))
