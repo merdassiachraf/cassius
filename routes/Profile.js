@@ -3,13 +3,13 @@ const router = express.Router();
 const passport = require("passport");
 
 const Profile = require("../models/Profile");
-const User= require("../models/User")
+const User = require("../models/User");
+
 //validation
 const validateProfileInput = require("../validation/profile");
 const validateAdressInput = require("../validation/adress");
 
 // current user Profile : private
-
 router.get(
   "/",
   passport.authenticate("jwt", { session: false }),
@@ -43,7 +43,7 @@ router.get("/all", (req, res) => {
       }
       res.json(profiles);
     })
-    .catch((err) => res.status(404).json({ msg: "there is no Profile" }));
+    .catch((err) => res.status(404).json(errors));
 });
 
 // profile/handle/:handle  : public
@@ -51,7 +51,7 @@ router.get("/all", (req, res) => {
 router.get("/handle/:handle", (req, res) => {
   const errors = {};
   Profile.findOne({ handle: req.params.handle })
-    .populate("user", ["name", "avatar"])
+    .populate("user", ["name", "avatar", "role"])
     .then((profile) => {
       if (!profile) {
         errors.noprofile = "There is no profile for user";
@@ -68,7 +68,7 @@ router.get("/handle/:handle", (req, res) => {
 router.get("/user/:user_id", (req, res) => {
   const errors = {};
   Profile.findOne({ user: req.params.user_id })
-    .populate("user", ["name", "avatar"])
+    .populate("user", ["name", "role"])
     .then((profile) => {
       if (!profile) {
         errors.noprofile = "There is no profile for user";
@@ -98,10 +98,18 @@ router.post(
     //get field
 
     const profileFields = {};
-
+    role = req.user.role;
     profileFields.user = req.user.id;
     if (req.body.handle) profileFields.handle = req.body.handle;
-    if (req.body.dateOfBirth) profileFields.dateOfBirth = req.body.dateOfBirth;
+    if (role === "Client") {
+      if (req.body.dateOfBirth)
+        profileFields.dateOfBirth = req.body.dateOfBirth;
+    } else if (role === "Agency") {
+      delete profileFields.dateOfBirth;
+    } else {
+      errors.wrongRole = "choose a wrong role";
+      res.status(400).json(errors);
+    }
 
     //social
 
@@ -146,27 +154,41 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const { errors, isValid } = validateAdressInput(req.body);
+    role = req.user.role;
 
     if (!isValid) {
       return res.status(400).json(errors);
     }
 
-    Profile.findOne({ user: req.user.id }).then((profile) => {
-      const newContactInformation = {
-        country: req.body.country,
-        countryCode: req.body.countryCode,
-        phoneNumber: req.body.phoneNumber,
-        adress: req.body.adress,
-        state: req.body.save,
-      };
+    Profile.findOne({ user: req.user.id })
+      .populate("user", ["name", "role"])
+      .then((profile) => {
+        const newContactInformation = {
+          country: req.body.country,
+          countryCode: req.body.countryCode,
+          phoneNumber: req.body.phoneNumber,
+          adress: req.body.adress,
+          state: req.body.save,
+        };
 
-      /// Add to adress array
-
-      profile.contactInformation.push(newContactInformation);
-      profile.save()
-        .then((profile) => res.json(profile))
-        .catch((err) => res.json(err));
-    });
+        /// Add to adress array
+        if (role === "Agency") {
+          profile.contactInformation.push(newContactInformation);
+          profile
+            .save()
+            .then((profile) => res.json(profile))
+            .catch((err) => res.json(err));
+        } else if (role === "Client") {
+          profile.contactInformation.splice(0,1,newContactInformation);
+          profile
+            .save()
+            .then((profile) => res.json(profile))
+            .catch((err) => res.json(err));
+        } else {
+          errors.wrongRole = "choose a wrong role";
+          res.status(400).json(errors);
+        }
+      });
   }
 );
 
