@@ -148,7 +148,7 @@ router.post(
 /// add adress profile:private
 
 router.post(
-  "/contact",
+  "/contact/add",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const { errors, isValid } = validateAdressInput(req.body);
@@ -193,16 +193,16 @@ router.post(
 // delete adress : private
 
 router.delete(
-  "/contact/:contact_id",
+  "/contact/delete/:contact_id",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     Profile.findOne({ user: req.user.id })
       .then((profile) => {
-        const removeContactInformation = profile.contactInformation
-          .map((contact) => contact.id)
+        const removeIndex = profile.contactInformation
+          .map((item) => item.id)
           .indexOf(req.params.contact_id);
 
-        profile.contactInformation.splice(removeContactInformation, 1);
+        profile.contactInformation.splice(removeIndex, 1);
 
         profile.save().then((profile) => res.json(profile));
       })

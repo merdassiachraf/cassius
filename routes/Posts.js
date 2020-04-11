@@ -10,7 +10,7 @@ const validatePostInput = require("../validation/post");
 
 // Get posts:public
 
-router.get("/", (req, res) => {
+router.get("/all", (req, res) => {
   Post.find()
     .sort({ date: -1 })
     .then((posts) => res.json(posts))
@@ -56,26 +56,32 @@ router.post(
 //Delete post : id /private
 
 router.delete(
-  "/:id",
+  "/delete/:id",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     Profile.findOne({ user: req.user.id }).then((profile) => {
-      this.post.findById(req.params.id).then((post) => {
-        if (post.user.toString() !== req.user.id) {
-          return res.status(401).json({ notAuthorize: "User not authorized" });
+      Post.findById(req.params.id).then((post) => {
+        if (!post) {
+          res.status(404).json({ nopost: "Post not found" });
+        } else {
+          if (post.user.toString() !== req.user.id) {
+            return res
+              .status(401)
+              .json({ notAuthorize: "User not authorized" });
+          } else {
+            post
+              .remove()
+              .then((post) => {
+                res.json({ sucess: true });
+              })
+              .catch((err) =>
+                res.status(404).json({ postnotfound: "No post found" })
+              );
+          }
         }
-
-        post
-          .remove()
-          .then(() => res.json({ sucess: true }))
-          .ctatch((err) =>
-            res.status(404).json({ postnotfound: "No post found" })
-          );
       });
     });
   }
 );
-
-//Get All posts
 
 module.exports = router;
