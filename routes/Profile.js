@@ -213,11 +213,13 @@ router.delete(
 //profile delete : private
 
 router.delete(
-  "/",
+  "/delete/user",
   passport.authenticate("jwt", { session: false }),
-  (res, req) => {
-    Profile.findOneAndRemove({ user: req.user.id }).then(() => {
-      User.findOneAndRemove({ _id: req.user.id }).then(() =>
+  (req, res) => {
+    Profile.findOneAndRemove({ user: req.user.id })
+    .then(() => {
+      User.findOneAndRemove({ _id: req.user.id })
+      .then(() =>
         res.json({ success: true })
       );
     });
