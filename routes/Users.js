@@ -26,22 +26,23 @@ router.post("/signup", (req, res) => {
     return res.status(400).json(errors);
   }
 
-  User.findOne({ email: req.body.email })
+  User.findOne({ email: req.body.email.toLowerCase() })
     .then((user) => {
       if (user) {
-        errors.email='Email already exist...'
+        errors.email = "Email already exist...";
         return res.status(404).json(errors);
       } else {
+        const role = req.body.role;
         const avatar = gravatar.url(req.body.email, {
           s: "200",
           r: "pg",
           d: "mm",
         });
-
+if (role==="Agency"||role==="Client"){
         const newUser = new User({
           name: req.body.name,
-          email: req.body.email,
-          role: req.body.role,
+          email: req.body.email.toLowerCase(),
+          role,
           avatar,
           password: req.body.password,
         });
@@ -54,7 +55,11 @@ router.post("/signup", (req, res) => {
               .then((user) => res.json(user))
               .catch((err) => console.log(err));
           });
-        });
+        });}
+        else {
+          errors.role='You must choose between Agency or client Role'
+          res.status(400).json(errors)
+        }
       }
     })
     .catch((err) => console.log(err));
@@ -71,7 +76,7 @@ router.post("/signin", (req, res) => {
     return res.status(400).json(errors);
   }
 
-  const email = req.body.email;
+  const email = req.body.email.toLowerCase();
   const password = req.body.password;
 
   //find User by email
@@ -79,7 +84,7 @@ router.post("/signin", (req, res) => {
   User.findOne({ email }).then((user) => {
     // check user
     if (!user) {
-      errors.email="User not found";
+      errors.email = "User not found";
       return res.status(404).json(errors);
     }
 
@@ -93,7 +98,7 @@ router.post("/signin", (req, res) => {
           id: user.id,
           avatar: user.avatar,
           name: user.name,
-          email:user.email
+          email: user.email,
         };
 
         //sign Token
@@ -110,7 +115,7 @@ router.post("/signin", (req, res) => {
           }
         );
       } else {
-        errors.password='password incorect'
+        errors.password = "password incorect";
         return res.status(400).json(errors);
       }
     });

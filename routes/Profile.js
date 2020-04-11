@@ -17,7 +17,7 @@ router.get(
     const errors = {};
 
     Profile.findOne({ user: req.user.id })
-      .populate("user", ["name", "avatar"])
+      .populate("user", ["name", "role"])
       .then((profile) => {
         if (!profile) {
           errors.noprofile = "There is no profile for this user";
@@ -31,10 +31,11 @@ router.get(
 
 //all profile
 
-router.get("/all", (req, res) => {
+router.get("/agencies", (req, res) => {
   const errors = {};
+
   Profile.find()
-    .populate("user", ["name", "avatar"])
+    .populate("user", ["name", "role"])
     .then((profiles) => {
       if (!profiles) {
         errors.noprofile = "There is no profile for this user";
@@ -100,17 +101,12 @@ router.post(
     const profileFields = {};
     role = req.user.role;
     profileFields.user = req.user.id;
-    if (role === "Client" || role === "Agency") {
-      if (req.body.handle) profileFields.handle = req.body.handle;
-      if (role === "Client") {
-        if (req.body.dateOfBirth)
-          profileFields.dateOfBirth = req.body.dateOfBirth;
-      } else if (role === "Agency") {
-        delete profileFields.dateOfBirth;
-      }
-    } else {
-      errors.wrongRole = "choose a wrong role";
-      res.status(400).json(errors);
+    if (req.body.handle) profileFields.handle = req.body.handle.toLowerCase();
+    if (role === "Client") {
+      if (req.body.dateOfBirth)
+        profileFields.dateOfBirth = req.body.dateOfBirth;
+    } else if (role === "Agency") {
+      delete profileFields.dateOfBirth;
     }
 
     //social
@@ -170,7 +166,7 @@ router.post(
           countryCode: req.body.countryCode,
           phoneNumber: req.body.phoneNumber,
           adress: req.body.adress,
-          state: req.body.save,
+          state: req.body.state,
         };
 
         /// Add to adress array

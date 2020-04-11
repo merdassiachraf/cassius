@@ -59,15 +59,23 @@ router.delete(
   "/:id",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    Profile.findOne({ user: req.yser.id }).then((profile) => {
+    Profile.findOne({ user: req.user.id }).then((profile) => {
       this.post.findById(req.params.id).then((post) => {
-        if (post.user.toString() !== req.user.id){
-          return res.status(401).json({ notAuthorize: "User not authorized" })};
+        if (post.user.toString() !== req.user.id) {
+          return res.status(401).json({ notAuthorize: "User not authorized" });
+        }
 
-          post.remove().then(()=> res.json({sucess:true})).ctatch(err=>res.status(404).json({postnotfound:"No post found"}))
+        post
+          .remove()
+          .then(() => res.json({ sucess: true }))
+          .ctatch((err) =>
+            res.status(404).json({ postnotfound: "No post found" })
+          );
       });
     });
   }
 );
+
+//Get All posts
 
 module.exports = router;

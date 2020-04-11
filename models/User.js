@@ -10,11 +10,21 @@ const UserSchema = new Schema({
   name: {
     type: String,
     required: true,
+  } || {
+    firstName: {
+      type: String,
+      required: true,
+    },
+    lastNme: {
+      type: String,
+      required: true,
+    },
   },
   email: {
     type: String,
     required: true,
-    unique:true
+    unique: true,
+    lower: true,
   },
   password: {
     type: String,
