@@ -4,6 +4,7 @@ const passport = require("passport");
 
 const Profile = require("../models/Profile");
 const User = require("../models/User");
+const Post = require("../models/Posts");
 
 //validation
 const validateProfileInput = require("../validation/profile");
@@ -216,12 +217,12 @@ router.delete(
   "/delete/user",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    Profile.findOneAndRemove({ user: req.user.id })
-    .then(() => {
-      User.findOneAndRemove({ _id: req.user.id })
-      .then(() =>
-        res.json({ success: true })
-      );
+    Profile.findOneAndRemove({ user: req.user.id }).then(() => {
+      User.findOneAndRemove({ _id: req.user.id }).then(() => {
+        Post.findOneAndRemove({ profile: req.profile.id }).then(() =>
+          res.json({ success: true })
+        );
+      });
     });
   }
 );
