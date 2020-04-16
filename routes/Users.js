@@ -33,17 +33,11 @@ router.post("/signup", (req, res) => {
         return res.status(404).json(errors);
       } else {
         const role = req.body.role;
-        const avatar = gravatar.url(req.body.email, {
-          s: "200",
-          r: "pg",
-          d: "mm",
-        });
-if (role==="Agency"||role==="Client"){
+       if (role==="Agency"||role==="Client"){
         const newUser = new User({
           name: req.body.name,
           email: req.body.email.toLowerCase(),
           role,
-          avatar,
           password: req.body.password,
         });
         bycrypt.genSalt(10, (err, salt) => {
