@@ -21,7 +21,7 @@ module.exports = function validateLoginInput(data) {
   }
 
   if (!Validator.isEmail(data.email)) {
-    errors.email = "Invalidate E-mail";
+    errors.email = "Invalidate Email";
   }
 
 
