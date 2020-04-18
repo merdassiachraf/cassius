@@ -10,15 +10,6 @@ const UserSchema = new Schema({
   name: {
     type: String,
     required: true,
-  } || {
-    firstName: {
-      type: String,
-      required: true,
-    },
-    lastNme: {
-      type: String,
-      required: true,
-    },
   },
   email: {
     type: String,
@@ -30,9 +21,13 @@ const UserSchema = new Schema({
     type: String,
     required: true,
   },
+  agree: {
+    type: String,
+    require: true,
+  },
   date: {
     type: Date,
     default: Date.now,
-  }
+  },
 });
 module.exports = User = mongoose.model("users", UserSchema);

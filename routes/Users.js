@@ -17,7 +17,7 @@ router.get("/test", (req, res) => res.json({ msg: "user  works" }));
 
 //SingUp : public access
 
-router.post("/signup", (req, res) => {
+router.post("/register", (req, res) => {
   const { errors, isValid } = validatorRegisterInput(req.body);
 
   //Check validation
@@ -33,26 +33,45 @@ router.post("/signup", (req, res) => {
         return res.status(404).json(errors);
       } else {
         const role = req.body.role;
-       if (role==="Agency"||role==="Client"){
-        const newUser = new User({
-          name: req.body.name,
-          email: req.body.email.toLowerCase(),
-          role,
-          password: req.body.password,
-        });
-        bycrypt.genSalt(10, (err, salt) => {
-          bycrypt.hash(newUser.password, salt, (err, hash) => {
-            if (err) throw err;
-            newUser.password = hash;
-            newUser
-              .save()
-              .then((user) => res.json(user))
-              .catch((err) => console.log(err));
+        if (role === "Agency") {
+          const newUser = new User({
+            name: req.body.name,
+            email: req.body.email.toLowerCase(),
+            role,
+            password: req.body.password,
           });
-        });}
-        else {
-          errors.role='You must choose between Agency or client Role'
-          res.status(400).json(errors)
+          bycrypt.genSalt(10, (err, salt) => {
+            bycrypt.hash(newUser.password, salt, (err, hash) => {
+              if (err) throw err;
+              newUser.password = hash;
+              newUser
+                .save()
+                .then((user) => res.json(user))
+                .catch((err) => console.log(err));
+            });
+          });
+        }
+        if (role === "Client") {
+          const newUser = new User({
+            name:
+              req.body.lname.toUpperCase() +
+              " " +
+              req.body.fname.charAt(0).toUpperCase() +
+              req.body.fname.slice(1).toLowerCase(),
+            email: req.body.email.toLowerCase(),
+            role,
+            password: req.body.password,
+          });
+          bycrypt.genSalt(10, (err, salt) => {
+            bycrypt.hash(newUser.password, salt, (err, hash) => {
+              if (err) throw err;
+              newUser.password = hash;
+              newUser
+                .save()
+                .then((user) => res.json(user))
+                .catch((err) => console.log(err));
+            });
+          });
         }
       }
     })
