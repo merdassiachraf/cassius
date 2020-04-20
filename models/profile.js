@@ -19,7 +19,7 @@ const ProfileSchema = new Schema({
       type: String,
     },
     phoneNumber: {
-      type: String,
+      type: Number,
     },
     adress: {
       type: String,

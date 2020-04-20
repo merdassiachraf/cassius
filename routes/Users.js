@@ -37,7 +37,7 @@ router.post("/register", (req, res) => {
           const newUser = new User({
             name: req.body.name,
             email: req.body.email.toLowerCase(),
-            role,
+            role:req.body.role,
             password: req.body.password,
           });
           bycrypt.genSalt(10, (err, salt) => {
@@ -59,7 +59,7 @@ router.post("/register", (req, res) => {
               req.body.fname.charAt(0).toUpperCase() +
               req.body.fname.slice(1).toLowerCase(),
             email: req.body.email.toLowerCase(),
-            role,
+            role:req.body.role,
             password: req.body.password,
           });
           bycrypt.genSalt(10, (err, salt) => {
@@ -109,9 +109,10 @@ router.post("/signin", (req, res) => {
 
         const payload = {
           id: user.id,
-          avatar: user.avatar,
           name: user.name,
           email: user.email,
+          role:user.role,
+
         };
 
         //sign Token

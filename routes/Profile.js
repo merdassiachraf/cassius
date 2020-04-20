@@ -18,7 +18,6 @@ router.get(
     const errors = {};
 
     Profile.findOne({ user: req.user.id })
-      .populate("user", ["name", "role"])
       .then((profile) => {
         if (!profile) {
           errors.noprofile = "There is no profile for this user";
@@ -36,8 +35,7 @@ router.get("/agencies", (req, res) => {
   const errors = {};
 
   Profile.find()
-    .populate("user", ["name", "role"])
-    .then((profiles) => {
+   .then((profiles) => {
       if (!profiles) {
         errors.noprofile = "There is no profile for this user";
 
@@ -53,7 +51,6 @@ router.get("/agencies", (req, res) => {
 router.get("/handle/:handle", (req, res) => {
   const errors = {};
   Profile.findOne({ handle: req.params.handle })
-    .populate("user", ["name", "role"])
     .then((profile) => {
       if (!profile) {
         errors.noprofile = "There is no profile for user";
@@ -70,7 +67,6 @@ router.get("/handle/:handle", (req, res) => {
 router.get("/user/:user_id", (req, res) => {
   const errors = {};
   Profile.findOne({ user: req.params.user_id })
-    .populate("user", ["name", "role"])
     .then((profile) => {
       if (!profile) {
         errors.noprofile = "There is no profile for user";
@@ -89,8 +85,23 @@ router.post(
   "/",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    const { errors, isValid } = validateProfileInput(req.body);
+    let { isValid } = validateProfileInput(req.body);
+    const { errors } = validateProfileInput(req.body);
+    role = req.user.role;
 
+    if (role === "Agency") {
+      if (
+        !errors.handle &&
+        !errors.phoneNumber &&
+        !errors.countryCode &&
+        !errors.adress &&
+        !errors.state &&
+        !errors.country
+      ) {
+        delete errors.dateOfBirth;
+        isValid = true;
+      }
+    }
     //Check Validation
     if (!isValid) {
       //return any erros with 400 status
@@ -98,9 +109,8 @@ router.post(
     }
 
     //get field
-
     const profileFields = {};
-    role = req.user.role;
+
     profileFields.user = req.user.id;
     if (req.body.handle) profileFields.handle = req.body.handle.toLowerCase();
     if (role === "Client") {
@@ -109,6 +119,18 @@ router.post(
     } else if (role === "Agency") {
       delete profileFields.dateOfBirth;
     }
+
+    profileFields.contactInformation = {};
+
+    if (req.body.adress)
+      profileFields.contactInformation.adress = req.body.adress;
+    if (req.body.state) profileFields.contactInformation.state = req.body.state;
+    if (req.body.country)
+      profileFields.contactInformation.country = req.body.country;
+    if (req.body.countryCode)
+      profileFields.contactInformation.countryCode = req.body.countryCode;
+    if (req.body.phoneNumber)
+      profileFields.contactInformation.phoneNumber = req.body.phoneNumber;
 
     //social
 
@@ -146,7 +168,7 @@ router.post(
   }
 );
 
-/// add adress profile:private
+/// add adress agency and update adress client profile:private
 
 router.post(
   "/contact/add",
