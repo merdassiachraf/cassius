@@ -39,7 +39,7 @@ router.get("/agencies", (req, res) => {
       if (!profiles) {
         errors.noprofile = "There is no profile for this user";
 
-        return res.status(404).json(errors);
+        return res.status(404).json(errors.noprofile);
       }
       res.json(profiles);
     })
@@ -54,7 +54,7 @@ router.get("/handle/:handle", (req, res) => {
     .then((profile) => {
       if (!profile) {
         errors.noprofile = "There is no profile for user";
-        res.status(404).json(errors);
+        res.status(404).json(errors.noprofile);
       }
 
       res.json(profile);
@@ -66,17 +66,18 @@ router.get("/handle/:handle", (req, res) => {
 
 router.get("/user/:user_id", (req, res) => {
   const errors = {};
+  errors.profile = "There is no profile for user";
+
   Profile.findOne({ user: req.params.user_id })
     .then((profile) => {
       if (!profile) {
-        errors.noprofile = "There is no profile for user";
-        res.status(404).json(errors);
+        res.status(404).json(errors.profile);
       }
 
       res.json(profile);
     })
     .catch((err) =>
-      res.status(404).json({ profile: "ther is no profile for this user" })
+      res.status(404).json(errors.profile)
     );
 });
 
@@ -154,7 +155,7 @@ router.post(
         Profile.findOne({ handle: profileFields.handle }).then((profile) => {
           if (profile) {
             errors.handle = "That handle already exists";
-            res.status(400).json(errors);
+            res.status(400).json(errors.handle);
           }
 
           //Save profile
@@ -216,14 +217,14 @@ router.post(
 // delete adress : private
 
 router.delete(
-  "/contact/delete/:contact_id",
+  "/contact/delete/:id",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     Profile.findOne({ user: req.user.id })
       .then((profile) => {
         const removeIndex = profile.contactInformation
           .map((item) => item.id)
-          .indexOf(req.params.contact_id);
+          .indexOf(req.params.id);
 
         profile.contactInformation.splice(removeIndex, 1);
 
@@ -236,7 +237,7 @@ router.delete(
 //profile delete : private
 
 router.delete(
-  "/delete/user",
+  "/delete",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     Profile.findOneAndRemove({ user: req.user.id }).then(() => {
@@ -250,3 +251,7 @@ router.delete(
 );
 
 module.exports = router;
+
+
+
+

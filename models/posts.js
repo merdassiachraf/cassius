@@ -7,8 +7,21 @@ const PostsSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "users",
   },
+  role: {
+    type: String,
+    required: true,
+  },
   name: {
     type: String,
+    required: true,
+  },
+  country: {
+    type: String,
+    required: true,
+  },
+  state: {
+    type: String,
+    required: true,
   },
   avatar: {
     type: String,
@@ -30,7 +43,7 @@ const PostsSchema = new Schema({
     required: true,
   },
   pricePerDay: {
-    type: Number,
+    type: String,
     required: true,
   },
   carPictures: {

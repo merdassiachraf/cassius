@@ -19,7 +19,7 @@ const ProfileSchema = new Schema({
       type: String,
     },
     phoneNumber: {
-      type: Number,
+      type: String,
     },
     adress: {
       type: String,
@@ -53,4 +53,4 @@ const ProfileSchema = new Schema({
     default: Date.now,
   },
 });
-module.exports = Profilee = mongoose.model("profile", ProfileSchema);
+module.exports = Profile = mongoose.model("profile", ProfileSchema);

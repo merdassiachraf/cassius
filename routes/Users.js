@@ -37,7 +37,7 @@ router.post("/register", (req, res) => {
           const newUser = new User({
             name: req.body.name,
             email: req.body.email.toLowerCase(),
-            role:req.body.role,
+            role: req.body.role,
             password: req.body.password,
           });
           bycrypt.genSalt(10, (err, salt) => {
@@ -59,7 +59,7 @@ router.post("/register", (req, res) => {
               req.body.fname.charAt(0).toUpperCase() +
               req.body.fname.slice(1).toLowerCase(),
             email: req.body.email.toLowerCase(),
-            role:req.body.role,
+            role: req.body.role,
             password: req.body.password,
           });
           bycrypt.genSalt(10, (err, salt) => {
@@ -80,7 +80,7 @@ router.post("/register", (req, res) => {
 
 //SingIn : returning Token : public access
 
-router.post("/signin", (req, res) => {
+router.post("/login", (req, res) => {
   const { errors, isValid } = validatorLoginInput(req.body);
 
   //Check validation
@@ -98,7 +98,7 @@ router.post("/signin", (req, res) => {
     // check user
     if (!user) {
       errors.email = "User not found";
-      return res.status(404).json(errors);
+      return res.status(404).json(errors.email);
     }
 
     //check password
@@ -111,8 +111,7 @@ router.post("/signin", (req, res) => {
           id: user.id,
           name: user.name,
           email: user.email,
-          role:user.role,
-
+          role: user.role,
         };
 
         //sign Token
@@ -130,7 +129,7 @@ router.post("/signin", (req, res) => {
         );
       } else {
         errors.password = "password incorect";
-        return res.status(400).json(errors);
+        return res.status(400).json(errors.password);
       }
     });
   });

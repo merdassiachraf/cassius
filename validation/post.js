@@ -9,7 +9,10 @@ module.exports = function validatePostInput(data) {
   data.model = !isEmpty(data.model) ? data.model : "";
   data.fuel = !isEmpty(data.fuel) ? data.fuel : "";
   data.transmission = !isEmpty(data.transmission) ? data.transmission : "";
-  data.pricePerDay = !isEmpty(data.pricePerDay) ? data.pricePerDay : "";
+  data.pricePerDay = !isEmpty(data.pricePerDay) ? data.pricePerDay : "" ;
+  data.country = !isEmpty(data.country) ? data.country : "";
+  data.state = !isEmpty(data.state) ? data.state : "";
+
 
   if (Validator.isEmpty(data.brand)) {
     errors.brand = "brand field is required";
@@ -29,6 +32,13 @@ module.exports = function validatePostInput(data) {
 
   if (Validator.isEmpty(data.pricePerDay)) {
     errors.pricePerDay = "Price per day field is required";
+  }
+
+  if (Validator.isEmpty(data.country)) {
+    errors.country = "Country field is required";
+  }
+  if (Validator.isEmpty(data.state)) {
+    errors.state = "State field is required";
   }
 
   return {
