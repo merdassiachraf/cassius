@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 
+
 const Profile = require("../models/Profile");
 const User = require("../models/User");
 const Post = require("../models/Posts");
@@ -9,6 +10,7 @@ const Post = require("../models/Posts");
 //validation
 const validateProfileInput = require("../validation/profile");
 const validateAdressInput = require("../validation/adress");
+
 
 // current user Profile : private
 router.get(
@@ -35,7 +37,7 @@ router.get("/agencies", (req, res) => {
   const errors = {};
 
   Profile.find()
-   .then((profiles) => {
+    .then((profiles) => {
       if (!profiles) {
         errors.noprofile = "There is no profile for this user";
 
@@ -76,16 +78,16 @@ router.get("/user/:user_id", (req, res) => {
 
       res.json(profile);
     })
-    .catch((err) =>
-      res.status(404).json(errors.profile)
-    );
+    .catch((err) => res.status(404).json(errors.profile));
 });
 
 // post profil
 router.post(
   "/",
   passport.authenticate("jwt", { session: false }),
+  
   (req, res) => {
+
     let { isValid } = validateProfileInput(req.body);
     const { errors } = validateProfileInput(req.body);
     role = req.user.role;
@@ -110,6 +112,8 @@ router.post(
     }
 
     //get field
+   
+
     const profileFields = {};
 
     profileFields.user = req.user.id;
@@ -251,7 +255,3 @@ router.delete(
 );
 
 module.exports = router;
-
-
-
-
