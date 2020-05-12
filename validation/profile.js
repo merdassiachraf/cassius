@@ -28,27 +28,27 @@ module.exports = function validateProfileInput(data) {
 
   if (!isEmpty(data.youtube)) {
     if (!Validator.isURL(data.youtube)) {
-      errors.youtube = "Not a Valid URL";
+      errors.youtube = "Youtube link is not a Valid URL";
     }
   }
   if (!isEmpty(data.twitter)) {
     if (!Validator.isURL(data.twitter)) {
-      errors.twitter = "Not a Valid URL";
+      errors.twitter = "Twitter link is not a Valid URL";
     }
   }
   if (!isEmpty(data.facebook)) {
     if (!Validator.isURL(data.facebook)) {
-      errors.facebook = "Not a Valid URL";
+      errors.facebook = "Facebook link is not a Valid URL";
     }
   }
   if (!isEmpty(data.instagram)) {
     if (!Validator.isURL(data.instagram)) {
-      errors.instagram = "Not a Valid URL";
+      errors.instagram = "Instagram link is not a Valid URL";
     }
   }
   if (!isEmpty(data.linkedin)) {
     if (!Validator.isURL(data.linkedin)) {
-      errors.linkedin = "Not a Valid URL";
+      errors.linkedin = "Linkedin link is not a Valid URL";
     }
   }
 
@@ -62,7 +62,7 @@ module.exports = function validateProfileInput(data) {
   }
 
   if (Validator.isEmpty(data.phoneNumber)) {
-    errors.phoneNumber = "ChoneNumber field is required";
+    errors.phoneNumber = "PhoneNumber field is required";
   }
   if (Validator.isEmpty(data.countryCode)) {
     errors.countryCode = "CountryCode field is required";
