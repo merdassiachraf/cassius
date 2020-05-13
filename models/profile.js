@@ -6,30 +6,53 @@ const ProfileSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "users",
   },
-  avatar:{
-    type:String,
+  avatar: {
+    type: String,
   },
   handle: {
     type: String,
     required: true,
     max: 40,
   },
+  country: {
+    type: String,
+    required: true,
+  },
+  adress: {
+    type: String,
+    required: true,
+  },
+  state: {
+    type: String,
+    required: true,
+  },
+  countryCode: {
+    type: String,
+    required: true,
+  },
+  phoneNumber: {
+    type: String,
+    required: true,
+  },
+
   contactInformation: [
-   { country: {
-      type: String,
+    {
+      country: {
+        type: String,
+      },
+      adress: {
+        type: String,
+      },
+      state: {
+        type: String,
+      },
+      countryCode: {
+        type: String,
+      },
+      phoneNumber: {
+        type: String,
+      },
     },
-    countryCode: {
-      type: String,
-    },
-    phoneNumber: {
-      type: String,
-    },
-    adress: {
-      type: String,
-    },
-    state: {
-      type: String,
-    }}
   ],
   dateOfBirth: {
     type: String,

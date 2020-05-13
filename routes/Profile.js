@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 
-
 const Profile = require("../models/Profile");
 const User = require("../models/User");
 const Post = require("../models/Posts");
@@ -10,7 +9,6 @@ const Post = require("../models/Posts");
 //validation
 const validateProfileInput = require("../validation/profile");
 const validateAdressInput = require("../validation/adress");
-
 
 // current user Profile : private
 router.get(
@@ -85,9 +83,8 @@ router.get("/user/:user_id", (req, res) => {
 router.post(
   "/",
   passport.authenticate("jwt", { session: false }),
-  
-  (req, res) => {
 
+  (req, res) => {
     let { isValid } = validateProfileInput(req.body);
     const { errors } = validateProfileInput(req.body);
     role = req.user.role;
@@ -112,7 +109,6 @@ router.post(
     }
 
     //get field
-   
 
     const profileFields = {};
 
@@ -125,17 +121,16 @@ router.post(
       delete profileFields.dateOfBirth;
     }
 
-    profileFields.contactInformation = {};
 
     if (req.body.adress)
-      profileFields.contactInformation.adress = req.body.adress;
-    if (req.body.state) profileFields.contactInformation.state = req.body.state;
+      profileFields.adress = req.body.adress;
+    if (req.body.state) profileFields.state = req.body.state;
     if (req.body.country)
-      profileFields.contactInformation.country = req.body.country;
+      profileFields.country = req.body.country;
     if (req.body.countryCode)
-      profileFields.contactInformation.countryCode = req.body.countryCode;
+      profileFields.countryCode = req.body.countryCode;
     if (req.body.phoneNumber)
-      profileFields.contactInformation.phoneNumber = req.body.phoneNumber;
+      profileFields.phoneNumber = req.body.phoneNumber;
 
     //social
 
@@ -204,12 +199,6 @@ router.post(
             .save()
             .then((profile) => res.json(profile))
             .catch((err) => res.json(err));
-        } else if (role === "Client") {
-          profile.contactInformation.splice(0, 1, newContactInformation);
-          profile
-            .save()
-            .then((profile) => res.json(profile))
-            .catch((err) => res.json(err));
         } else {
           errors.wrongRole = "choose a wrong role";
           res.status(400).json(errors);
@@ -245,11 +234,11 @@ router.delete(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     Profile.findOneAndRemove({ user: req.user.id }).then(() => {
-      User.findOneAndRemove({ _id: req.user.id }).then(() => {
-        Post.findOneAndRemove({ profile: req.profile.id }).then(() =>
-          res.json({ success: true })
-        );
-      });
+        Post.find({ user: req.user.id }).remove().then(() => {
+          User.findOneAndRemove({ _id: req.user.id }).then(() => {
+          res.json({ success: "Profile deleted with succes " })
+        })
+      })
     });
   }
 );
