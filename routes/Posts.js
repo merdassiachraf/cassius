@@ -22,13 +22,40 @@ router.get("/", (req, res) => {
 
 // Get post:id :public
 
-router.get("/:id", (req, res) => {
+router.get("/post/:id", (req, res) => {
   const { errors } = validatePostInput(req.body);
-  errors.noposts = "There is no posts";
-  
+  errors.nopost = "There is no posts";
+
   Post.findById(req.params.id)
     .then((post) => res.json(post))
-    .catch((err) => res.status(404).json(errors.noposts));
+    .catch((err) => res.status(404).json(errors.nopost));
+});
+
+//Get current agency posts :public
+
+router.get("/agencies_posts/:user_id", (req, res) => {
+
+  Post.find({ user: req.params.user_id })
+    .then((post) =>{
+       res.json(post)})
+    .catch((err) => res.status(404).json(err));
+});
+
+//Get current agency posts :Private
+
+router.get(
+  "/my_posts", 
+passport.authenticate("jwt",{session:false})
+,(req, res) => {
+  Post.find({ user: req.user.id })
+    .then((post) => {
+      if (!post) {
+        errors.noposts = "There is no post for this user";
+        return res.status(404).json(errors.noposts);
+      }
+      res.json(post);
+    })
+    .catch((err) => res.status(404).json(err));
 });
 
 // create post : private
@@ -64,7 +91,7 @@ router.post(
       newPost
         .save()
         .then((post) => res.json(post))
-        .catch((err) => res.json(errors.post));
+        .catch((err) => res.status(404).json(errors.post));
     }
   }
 );

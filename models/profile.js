@@ -54,6 +54,10 @@ const ProfileSchema = new Schema({
       },
     },
   ],
+  role: {
+    type: String,
+    required: true,
+  },
   dateOfBirth: {
     type: String,
   },

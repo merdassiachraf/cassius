@@ -31,10 +31,27 @@ router.get(
 
 //all profile
 
-router.get("/agencies", (req, res) => {
+router.get("/profiles", (req, res) => {
   const errors = {};
 
   Profile.find()
+    .then((profiles) => {
+      if (!profiles) {
+        errors.noprofile = "There is no profile for this user";
+
+        return res.status(404).json(errors.noprofile);
+      }
+      res.json(profiles);
+    })
+    .catch((err) => res.status(404).json(errors));
+});
+
+//all agencies
+
+router.get("/agencies", (req, res) => {
+  const errors = {};
+
+  Profile.find({ role: "Agency" })
     .then((profiles) => {
       if (!profiles) {
         errors.noprofile = "There is no profile for this user";
@@ -112,7 +129,9 @@ router.post(
 
     const profileFields = {};
 
+    profileFields.role = req.user.role;
     profileFields.user = req.user.id;
+
     if (req.body.handle) profileFields.handle = req.body.handle.toLowerCase();
     if (role === "Client") {
       if (req.body.dateOfBirth)
@@ -121,16 +140,11 @@ router.post(
       delete profileFields.dateOfBirth;
     }
 
-
-    if (req.body.adress)
-      profileFields.adress = req.body.adress;
+    if (req.body.adress) profileFields.adress = req.body.adress;
     if (req.body.state) profileFields.state = req.body.state;
-    if (req.body.country)
-      profileFields.country = req.body.country;
-    if (req.body.countryCode)
-      profileFields.countryCode = req.body.countryCode;
-    if (req.body.phoneNumber)
-      profileFields.phoneNumber = req.body.phoneNumber;
+    if (req.body.country) profileFields.country = req.body.country;
+    if (req.body.countryCode) profileFields.countryCode = req.body.countryCode;
+    if (req.body.phoneNumber) profileFields.phoneNumber = req.body.phoneNumber;
 
     //social
 
@@ -234,11 +248,13 @@ router.delete(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     Profile.findOneAndRemove({ user: req.user.id }).then(() => {
-        Post.find({ user: req.user.id }).remove().then(() => {
+      Post.find({ user: req.user.id })
+        .remove()
+        .then(() => {
           User.findOneAndRemove({ _id: req.user.id }).then(() => {
-          res.json({ success: "Profile deleted with succes " })
-        })
-      })
+            res.json({ success: "Profile deleted with succes " });
+          });
+        });
     });
   }
 );
