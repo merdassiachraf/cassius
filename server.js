@@ -32,6 +32,7 @@ require("./config/passport")(passport);
 app.use("/posts", require("./routes/Posts"));
 app.use("/users", require("./routes/Users"));
 app.use("/profile", require("./routes/Profile"));
+app.use("/reservations",require('./routes/Reservations'))
 
 const port = process.env.PORT || 5000;
 

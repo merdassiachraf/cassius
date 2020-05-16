@@ -1,9 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const mongoose = require("mongoose");
 
-const Post = require("../models/Posts");
+const Post = require("../models/post");
 const Profile = require("../models/Profile");
 
 const validatePostInput = require("../validation/post");
@@ -34,29 +33,30 @@ router.get("/post/:id", (req, res) => {
 //Get current agency posts :public
 
 router.get("/agencies_posts/:user_id", (req, res) => {
-
   Post.find({ user: req.params.user_id })
-    .then((post) =>{
-       res.json(post)})
+    .then((post) => {
+      res.json(post);
+    })
     .catch((err) => res.status(404).json(err));
 });
 
 //Get current agency posts :Private
 
 router.get(
-  "/my_posts", 
-passport.authenticate("jwt",{session:false})
-,(req, res) => {
-  Post.find({ user: req.user.id })
-    .then((post) => {
-      if (!post) {
-        errors.noposts = "There is no post for this user";
-        return res.status(404).json(errors.noposts);
-      }
-      res.json(post);
-    })
-    .catch((err) => res.status(404).json(err));
-});
+  "/my_posts",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Post.find({ user: req.user.id })
+      .then((post) => {
+        if (!post) {
+          errors.noposts = "There is no post for this user";
+          return res.status(404).json(errors.noposts);
+        }
+        res.json(post);
+      })
+      .catch((err) => res.status(404).json(err));
+  }
+);
 
 // create post : private
 router.post(
@@ -69,29 +69,32 @@ router.post(
 
     role = req.user.role;
 
-    if (role === "Client") {
-      return res.status(400).json(errors);
-    } else {
+    if (role === "Agency") {
       if (!isValid) {
         return res.status(400).json(errors.role);
+      } else {
+        const newPost = new Post({
+          name: req.user.name,
+          user: req.user.id,
+          brand: req.body.brand,
+          model: req.body.model,
+          fuel: req.body.fuel,
+          transmission: req.body.transmission,
+          pricePerDay: req.body.pricePerDay + " dt/day",
+          adress:req.body.adress,
+          state: req.body.state,
+          country: req.body.country,
+          countryCode: req.body.countryCode,
+          phoneNumber: req.body.phoneNumber,
+          email: req.user.email,
+        });
+        newPost
+          .save()
+          .then((post) => res.json(post))
+          .catch((err) => res.status(404).json(errors.post));
       }
-
-      const newPost = new Post({
-        name: req.user.name,
-        user: req.user.id,
-        role,
-        brand: req.body.brand,
-        model: req.body.model,
-        fuel: req.body.fuel,
-        transmission: req.body.transmission,
-        pricePerDay: req.body.pricePerDay + " dt/day",
-        state: req.body.state,
-        country: req.body.country,
-      });
-      newPost
-        .save()
-        .then((post) => res.json(post))
-        .catch((err) => res.status(404).json(errors.post));
+    } else {
+      return res.status(400).json(errors);
     }
   }
 );

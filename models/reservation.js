@@ -1,17 +1,29 @@
 const mongoose = require("mongoose");
 
-const schema = mongoose.Schema;
+const Schema = mongoose.Schema;
 
-const ReservationsSchema = new Schema({
-  clientId: {
+const ReservationSchema = new Schema({
+  client: {
     type: Schema.Types.ObjectId,
     ref: "users",
+  },
+  startTime: {
+    type: String,
+    required: true,
+  },
+  returnTime: {
+    type: String,
+    required: true,
   },
   startDate: {
     type: String,
     required: true,
   },
   returnDate: {
+    type: String,
+    required: true,
+  },
+  totalDays: {
     type: String,
     required: true,
   },
@@ -47,14 +59,14 @@ const ReservationsSchema = new Schema({
     type: String,
     required: true,
   },
-  clientAdress: {
+  agencyAdress: {
     type: String,
     required: true,
   },
-  agencyId:{
-    type:String,
-    required:true
-},
+  agency: {
+    type: String,
+    required: true,
+  },
   agencyName: {
     type: String,
     required: true,
@@ -79,9 +91,9 @@ const ReservationsSchema = new Schema({
     type: String,
     required: true,
   },
-  carId:{
-      type:String,
-      required:true
+  car: {
+    type: String,
+    required: true,
   },
   brand: {
     type: String,
@@ -103,13 +115,36 @@ const ReservationsSchema = new Schema({
     type: String,
     required: true,
   },
-
+  status: {
+    type: String,
+    required: true,
+  },
+  response: {
+    type: String,
+    required: true,
+  },
+  postDate: {
+    type: Date,
+  },
+  editDate: {
+    type: Date,
+  },
+  confirmDate: {
+    type: Date,
+  },
+  cancelDate: {
+    type: Date,
+  },
+  confirmDate: {
+    type: Date,
+  },
+  cancelPart: {
+    type: String,
+  },
   date: {
     type: Date,
     default: Date.now,
   },
 });
-module.exports = Reservation = mongoose.model(
-  "reservation",
-  ReservationsSchema
-);
+
+module.exports = Reservation = mongoose.model("reservation", ReservationSchema);
