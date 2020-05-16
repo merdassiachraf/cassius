@@ -58,44 +58,64 @@ router.get(
   }
 );
 
+//Get agency post :public
+
+router.get("/agency/posts/:agency_id", (req, res) => {
+  Post.find({ user: req.params.agency_id })
+    .then((post) => {
+      if (!post) {
+        errors.noposts = "There is no post for this user";
+        return res.status(404).json(errors.noposts);
+      }
+      res.json(post);
+    })
+    .catch((err) => res.status(404).json(err));
+});
+
 // create post : private
 router.post(
   "/",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const { errors, isValid } = validatePostInput(req.body);
-    errors.role = "Only agencies can post !!!";
-    errors.post = "Only agencies can post !!!";
 
-    role = req.user.role;
-
-    if (role === "Agency") {
-      if (!isValid) {
-        return res.status(400).json(errors.role);
+    Profile.findOne({ user: req.user.id }).then((profile) => {
+      if (!profile) {
+        errors.profile = "No profile found";
+        res.status(404).json(errors.profile);
       } else {
-        const newPost = new Post({
-          name: req.user.name,
-          user: req.user.id,
-          brand: req.body.brand,
-          model: req.body.model,
-          fuel: req.body.fuel,
-          transmission: req.body.transmission,
-          pricePerDay: req.body.pricePerDay + " dt/day",
-          adress:req.body.adress,
-          state: req.body.state,
-          country: req.body.country,
-          countryCode: req.body.countryCode,
-          phoneNumber: req.body.phoneNumber,
-          email: req.user.email,
-        });
-        newPost
-          .save()
-          .then((post) => res.json(post))
-          .catch((err) => res.status(404).json(errors.post));
+        if (req.user.role === "Agency") {
+          adress = profile.adress;
+          state = profile.state;
+          country = profile.country;
+          countryCode = profile.countryCode;
+          phoneNumber = profile.phoneNumber;
+
+          const newPost = new Post({
+            name: req.user.name,
+            user: req.user.id,
+            brand: req.body.brand,
+            model: req.body.model,
+            fuel: req.body.fuel,
+            transmission: req.body.transmission,
+            pricePerDay: req.body.pricePerDay + " dt/day",
+            adress,
+            state,
+            country,
+            countryCode,
+            phoneNumber,
+            email: req.user.email,
+          });
+          newPost
+            .save()
+            .then((post) => res.json(post))
+            .catch((err) => res.status(404).json(err));
+        } else {
+          errors.post = "Only agencies can post !!!";
+          res.json(errors.post);
+        }
       }
-    } else {
-      return res.status(400).json(errors);
-    }
+    });
   }
 );
 
