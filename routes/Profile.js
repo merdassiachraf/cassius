@@ -133,6 +133,7 @@ router.post(
 
     profileFields.role = req.user.role;
     profileFields.user = req.user.id;
+    profileFields.name = req.user.name;
 
     if (req.body.handle) profileFields.handle = req.body.handle.toLowerCase();
     if (role === "Client") {
