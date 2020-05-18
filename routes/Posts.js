@@ -90,7 +90,7 @@ router.post(
           country = profile.country;
           countryCode = profile.countryCode;
           phoneNumber = profile.phoneNumber;
-
+          handle = profile.handle;
           const newPost = new Post({
             name: req.user.name,
             user: req.user.id,
@@ -105,6 +105,7 @@ router.post(
             countryCode,
             phoneNumber,
             email: req.user.email,
+            handle,
           });
           newPost
             .save()
