@@ -121,7 +121,6 @@ const ReservationSchema = new Schema({
   },
   response: {
     type: String,
-    required: true,
   },
   postDate: {
     type: Date,

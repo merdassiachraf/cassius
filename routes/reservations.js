@@ -58,7 +58,7 @@ router.post(
                   totalDays: req.body.totalDays,
                   totalPrice: req.body.totalPrice,
                   startTime: req.body.startTime,
-                  returnTime: req.body.returnDate,
+                  returnTime: req.body.returnTime,
                   status: "Waiting for confirmation",
                   client: req.user.id,
                   clientEmail: req.user.email,
@@ -86,7 +86,7 @@ router.post(
                 newReservation
                   .save()
                   .then((reservation) => res.json(reservation))
-                  .catch((err) => res.status(404).json(errors));
+                  .catch((err) => res.status(404).json(err));
               }
             });
           }
