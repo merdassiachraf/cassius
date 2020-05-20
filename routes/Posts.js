@@ -23,21 +23,41 @@ router.get("/", (req, res) => {
 
 router.get("/post/:id", (req, res) => {
   const { errors } = validatePostInput(req.body);
-  errors.nopost = "There is no posts";
+  errors.nopost = "Post not found";
 
   Post.findById(req.params.id)
-    .then((post) => res.json(post))
+    .then((post) => {
+      if (!post) {
+        res.status(404).json(errors.nopost);
+      } else {
+        res.json(post);
+      }
+    })
     .catch((err) => res.status(404).json(errors.nopost));
 });
 
-//Get current agency posts :public
+//Get an agency posts :public
 
 router.get("/agencies_posts/:user_id", (req, res) => {
-  Post.find({ user: req.params.user_id })
-    .then((post) => {
-      res.json(post);
+  const { errors } = validatePostInput(req.body);
+  errors.noposts = "There is no posts";
+  errors.noprofile = "Profile not found";
+
+  Profile.find({ user: req.params.user_id })
+    .then((profile) => {
+      if (!profile) {
+        res.status(404).json(errors.noprofile);
+      } else {
+        Post.find({ user: req.params.user_id }).then((post) => {
+          if (!post) {
+            res.status(404).json(errors.noposts);
+          } else {
+            res.json(post);
+          }
+        });
+      }
     })
-    .catch((err) => res.status(404).json(err));
+    .catch((err) => res.status(404).json(errors.noprofile));
 });
 
 //Get current agency posts :Private
@@ -57,20 +77,6 @@ router.get(
       .catch((err) => res.status(404).json(err));
   }
 );
-
-//Get agency post :public
-
-router.get("/agency/posts/:agency_id", (req, res) => {
-  Post.find({ user: req.params.agency_id })
-    .then((post) => {
-      if (!post) {
-        errors.noposts = "There is no post for this user";
-        return res.status(404).json(errors.noposts);
-      }
-      res.json(post);
-    })
-    .catch((err) => res.status(404).json(err));
-});
 
 // create post : private
 router.post(
@@ -123,26 +129,25 @@ router.post(
 //Edit Post :id /private
 
 router.put(
-  "/edit_post/:id",
+  "/edit_post/:post_id",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const { errors, isValid } = validatePostInput(req.body);
-
-    errors.notAuthorize = "User not authorized";
+const user_id=req.user.id
+    errors.notAuthorize = "User not authorized to edit other post";
     errors.nopost = "Post not found";
-    errors.postnotfound = "Update Failed";
+    errors.fail = "Update Failed";
 
+    
     if (!isValid) {
       return res.status(400).json(errors);
-    }
-    Profile.findOne({ user: req.user.id }).then((profile) => {
-      Post.findById(req.params.id).then((post) => {
+    } else {
+      Post.findById(req.params.post_id).then((post) => {
         if (!post) {
-          res.status(404).json(errors.nopost);
+          res.status(400).json(errors.nopost);
         } else {
-          if (post.user.toString() !== req.user.id) {
-            return res.status(401).json(errors.notAuthorize);
-          } else {
+        
+          if (post.user ==req.user.id) {
             if (req.body.brand) post.brand = req.body.brand;
             if (req.body.model) post.model = req.body.model;
             if (req.body.fuel) post.fuel = req.body.fuel;
@@ -152,22 +157,36 @@ router.put(
               post.pricePerDay = req.body.pricePerDay + " dt/day";
             if (req.body.state) post.state = req.body.state;
             if (req.body.country) post.country = req.body.country;
-
-            post
-              .save()
-              .then((post) =>
-                res.json({
-                  post,
-                  sucess: "succes update",
-                })
-              )
-              .catch((err) => res.status(500).json(errors.postnotfound));
+            post.save((err, updatePost) => {
+              if (err) {
+                res.status(500).json(errors.fail);
+              } else {
+                res.json(updatePost);
+              }
+            });
+          } else {
+            res.json(errors.notAuthorize);
           }
         }
       });
-    });
+    }
   }
 );
+
+//         (err, res) => {
+//           if (!err) {
+//             res.send(err);
+//           } else {
+//             if (res.user.toString() !== req.profile.user) {
+//               return res.status(401).json(err);
+//             } else {
+//               res.json(res);
+//             }
+//           }
+//         }
+//       ).catch((err) => res.status(400).json(errors.fail));
+//     }
+//   });
 
 //Delete post : id /private
 

@@ -37,7 +37,7 @@ router.post("/register", (req, res) => {
           const newUser = new User({
             name: req.body.name,
             email: req.body.email.toLowerCase(),
-            role: req.body.role,
+            role,
             password: req.body.password,
           });
           bycrypt.genSalt(10, (err, salt) => {
@@ -51,7 +51,7 @@ router.post("/register", (req, res) => {
             });
           });
         }
-        if (role === "Client") {
+       else if (role === "Client") {
           const newUser = new User({
             name:
               req.body.lname.toUpperCase() +
@@ -59,7 +59,7 @@ router.post("/register", (req, res) => {
               req.body.fname.charAt(0).toUpperCase() +
               req.body.fname.slice(1).toLowerCase(),
             email: req.body.email.toLowerCase(),
-            role: req.body.role,
+            role,
             password: req.body.password,
           });
           bycrypt.genSalt(10, (err, salt) => {
@@ -72,6 +72,9 @@ router.post("/register", (req, res) => {
                 .catch((err) => console.log(err));
             });
           });
+        } else {
+          errors.role="Wrong role, you nedd to choose between 'Agency' or 'Client'"
+          res.status(400).json(errors)
         }
       }
     })

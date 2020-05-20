@@ -1,6 +1,6 @@
 const express = require("express");
 const passport = require("passport");
-const mongoose= require ("mongoose")
+const mongoose = require("mongoose");
 
 const router = express.Router();
 
@@ -69,36 +69,54 @@ router.get("/agencies", (req, res) => {
 
 router.get("/handle/:handle", (req, res) => {
   const errors = {};
+
+  errors.noprofile = "There is no profile for user";
+  errors.privacityView =
+    "Client account are private , you can visit only Agency account ";
+
   Profile.findOne({ handle: req.params.handle })
     .then((profile) => {
       if (!profile) {
-        errors.noprofile = "There is no profile for user";
         res.status(404).json(errors.noprofile);
-      }
+      } else {
+        role = profile.role;
 
-      res.json(profile);
+        if (role === "Agency") {
+          res.json(profile);
+        } else {
+          res.status(404).json(errors.privacityView);
+        }
+      }
     })
     .catch((err) => res.status(404).json(err));
 });
 
-// profile/handle/user/:user_id  : public
+// profile/user/:user_id  : public
 
 router.get("/user/:user_id", (req, res) => {
   const errors = {};
+
   errors.profile = "There is no profile for user";
+  errors.privacityView =
+    "Client account are private , you can visit only Agency account ";
 
   Profile.findOne({ user: req.params.user_id })
     .then((profile) => {
       if (!profile) {
         res.status(404).json(errors.profile);
+      } else {
+        role = profile.role;
+        if (role === "Agency") {
+          res.json(profile);
+        } else {
+          res.json(errors.privacityView);
+        }
       }
-
-      res.json(profile);
     })
-    .catch((err) => res.status(404).json(errors.profile));
+    .catch((err) => res.status(404).json(err));
 });
 
-// post profil
+// post and update Profile
 router.post(
   "/",
   passport.authenticate("jwt", { session: false }),
@@ -185,7 +203,7 @@ router.post(
   }
 );
 
-/// add adress agency and update adress client profile:private
+/// add contact  inofrmations agency :private
 
 router.post(
   "/contact/add",
@@ -217,7 +235,7 @@ router.post(
             .then((profile) => res.json(profile))
             .catch((err) => res.json(err));
         } else {
-          errors.wrongRole = "choose a wrong role";
+          errors.wrongRole = "Only Agency can add an other contact information";
           res.status(400).json(errors);
         }
       });
@@ -261,5 +279,11 @@ router.delete(
     });
   }
 );
+
+//Update profile
+router.put('edit/:user_id',passport.authenticate('jwt',{session:false}),(req,res)=>{
+
+})
+
 
 module.exports = router;
