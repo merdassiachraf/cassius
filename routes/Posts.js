@@ -146,15 +146,15 @@ router.put(
           res.status(404).json(errors.nopost);
         } else {
           if (post.user == req.user.id) {
-            if (req.body.brand) post.brand = req.body.brand;
-            if (req.body.model) post.model = req.body.model;
-            if (req.body.fuel) post.fuel = req.body.fuel;
+            if (req.body.brand) return (post.brand = req.body.brand);
+            if (req.body.model) return (post.model = req.body.model);
+            if (req.body.fuel) return (post.fuel = req.body.fuel);
             if (req.body.transmission)
-              post.transmission = req.body.transmission;
+              return (post.transmission = req.body.transmission);
             if (req.body.pricePerDay)
-              post.pricePerDay = req.body.pricePerDay + " dt/day";
-            if (req.body.state) post.state = req.body.state;
-            if (req.body.country) post.country = req.body.country;
+              return (post.pricePerDay = req.body.pricePerDay + " dt/day");
+            if (req.body.state) return (post.state = req.body.state);
+            if (req.body.country) return (post.country = req.body.country);
             post.save((err, updatePost) => {
               if (err) {
                 res.status(500).json(errors.fail);
@@ -171,20 +171,6 @@ router.put(
   }
 );
 
-//         (err, res) => {
-//           if (!err) {
-//             res.send(err);
-//           } else {
-//             if (res.user.toString() !== req.profile.user) {
-//               return res.status(401).json(err);
-//             } else {
-//               res.json(res);
-//             }
-//           }
-//         }
-//       ).catch((err) => res.status(400).json(errors.fail));
-//     }
-//   });
 
 //Delete post : id /private
 

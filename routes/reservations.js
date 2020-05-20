@@ -152,6 +152,7 @@ router.put(
     errors.noreservation = "Reservation not found";
     errors.fail = "Update Failed";
     errors.notwaiting = "This reservation is confirmed or canceled";
+    errors.wrongRole = "Only Client can edit reservation";
 
     if (!isValid) {
       return res.status(400).json(errors);
@@ -161,24 +162,25 @@ router.put(
           if (!reservation) {
             res.status(404).json(errors.noreservation);
           } else {
-            if (reservation.client == req.user.id) {
-              status = reservation.status;
-
-              if (status != "Canceled" && status !="Confirmed") {
+            if (req.user.role === "Client") {
+              if (reservation.client == req.user.id) {
+                if (reservation.status !== "Canceled" && reservation.status !== "Confirmed") {
+                if (!req.body.status)
+                  return (reservation.status =
+                    "Changed and waiting for confirmation");
                 if (req.body.startDate)
-                  reservation.startDate = req.body.startDate;
+                  return (reservation.startDate = req.body.startDate);
                 if (req.body.returnDate)
-                  reservation.returnDate = req.body.returnDate;
+                  return (reservation.returnDate = req.body.returnDate);
                 if (req.body.totalDays)
-                  reservation.totalDays = req.body.totalDays;
+                  return (reservation.totalDays = req.body.totalDays);
                 if (req.body.totalPrice)
-                  reservation.totalPrice = req.body.totalPrice;
+                  return (reservation.totalPrice = req.body.totalPrice);
                 if (req.body.startTime)
-                  reservation.startTime = req.body.startTime;
+                  return (reservation.startTime = req.body.startTime);
                 if (req.body.returnDate)
-                  reservation.returnTime = req.body.returnDate;
-                reservation.status = "Changed and waiting for confirmation";
-               
+                  return (reservation.returnTime = req.body.returnTime);
+
                 reservation.save((err, updateReservation) => {
                   if (err) {
                     res.status(500).json(errors.fail);
@@ -186,11 +188,14 @@ router.put(
                     res.json(updateReservation);
                   }
                 });
+                } else {
+                  res.status(500).json(errors.notwaiting);
+                }
               } else {
-                res.status(500).json(errors.notwaiting);
+                res.json(errors.notAuthorize);
               }
             } else {
-              res.json(errors.notAuthorize);
+              res.json(errors.wrongRole);
             }
           }
         })
