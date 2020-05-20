@@ -106,47 +106,93 @@ router.get(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const errors = {};
-    Reservation.find({ client: req.user.id }).then((reservation) => {
-      if (!reservation) {
-        errors.reservation = "No reservation found for you!!!";
-        res.status(400).json(errors.reservation);
-      } else {
-        Reservation.findById(req.params.reservation_id)
-          .then((reservation) => {
-            if (!reservation) {
-              res.status(400).json(errors.reservation);
-            } else {
-              res.json(reservation);
-            }
-          })
-          .catch((err) => res.json(err));
-      }
-    });
+    role = req.user.role;
+
+    errors.noreservation = "No reservation found for you!!!";
+
+    errors.notauthrizate =
+      "Your not authorizate to acces to this reservation!!!";
+
+    if (role === "Client") {
+      Reservation.findById(req.params.reservation_id).then((reservation) => {
+        if (!reservation) {
+          res.status(400).json(errors.noreservation);
+        } else {
+          if (reservation.client == req.user.id) {
+            res.json(reservation);
+          } else {
+            res.status(400).json(errors.notauthrizate);
+          }
+        }
+      });
+    } else {
+      Reservation.findById(req.params.reservation_id).then((reservation) => {
+        if (!reservation) {
+          res.status(400).json(errors.noreservation);
+        } else {
+          if (reservation.agency == req.user.id) {
+            res.json(reservation);
+          } else {
+            res.status(400).json(errors.notauthrizate);
+          }
+        }
+      });
+    }
   }
 );
 
 // Edit reservation:private
 
 router.put(
-  "/edit/:reservation_id",
+  "/edit_reservation/:reservation_id",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    const { errors } = validateReservationInput(req.body);
-    errors.reservationedit = "Error edit";
-    status = req.reservation.status;
+    const { errors, isValid } = validateReservationInput(req.body);
+    errors.notAuthorize = "User not authorized to acces to others reservation";
+    errors.noreservation = "Reservation not found";
+    errors.fail = "Update Failed";
+    errors.notwaiting = "This reservation is confirmed or canceled";
 
-    if (status === ("Canceled" || "Confirmed")) {
-      Reservation.find({ id: req.params.reservation_id })
-        .updateMany({
-          $set: {
-            startDate: req.body.startDate,
-            returnDate: req.body.returnDate,
-            totalDays: req.body.totalDays,
-            totalPrice: req.body.totalPrice,
-            startTime: req.body.startTime,
-            returnTime: req.body.returnDate,
-            status: "Changed and waiting for confirmation",
-          },
+    if (!isValid) {
+      return res.status(400).json(errors);
+    } else {
+      Reservation.findById(req.params.reservation_id)
+        .then((reservation) => {
+          if (!reservation) {
+            res.status(404).json(errors.noreservation);
+          } else {
+            if (reservation.client == req.user.id) {
+              status = reservation.status;
+
+              if (status != "Canceled" && status !="Confirmed") {
+                if (req.body.startDate)
+                  reservation.startDate = req.body.startDate;
+                if (req.body.returnDate)
+                  reservation.returnDate = req.body.returnDate;
+                if (req.body.totalDays)
+                  reservation.totalDays = req.body.totalDays;
+                if (req.body.totalPrice)
+                  reservation.totalPrice = req.body.totalPrice;
+                if (req.body.startTime)
+                  reservation.startTime = req.body.startTime;
+                if (req.body.returnDate)
+                  reservation.returnTime = req.body.returnDate;
+                reservation.status = "Changed and waiting for confirmation";
+               
+                reservation.save((err, updateReservation) => {
+                  if (err) {
+                    res.status(500).json(errors.fail);
+                  } else {
+                    res.json(updateReservation);
+                  }
+                });
+              } else {
+                res.status(500).json(errors.notwaiting);
+              }
+            } else {
+              res.json(errors.notAuthorize);
+            }
+          }
         })
         .then((reservation) => res.json(reservation))
         .catch((err) => res.json(err));
@@ -170,14 +216,30 @@ router.get(
   (req, res) => {
     role = req.user.role;
 
+    const { errors } = validateReservationInput(req.body);
+
+    errors.noreservation = "You dont have any reservations";
+
     {
       if (role === "Client") {
         Reservation.find({ client: req.user.id })
-          .then((reservation) => res.json(reservation))
+          .then((reservation) => {
+            if (!reservation) {
+              res.status(404).json(errors.noreservation);
+            } else {
+              res.json(reservation);
+            }
+          })
           .catch((err) => res.json(err));
       } else {
         Reservation.find({ agency: req.user.id })
-          .then((reservation) => res.json(reservation))
+          .then((reservation) => {
+            if (!reservation) {
+              res.status(404).json(errors.noreservation);
+            } else {
+              res.json(reservation);
+            }
+          })
           .catch((err) => res.json(err));
       }
     }
@@ -233,7 +295,7 @@ router.get(
   }
 );
 
-// Get conceled reservation: private
+// Get canceled reservation: private
 
 router.get(
   "/user/waiting",

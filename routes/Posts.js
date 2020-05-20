@@ -133,21 +133,19 @@ router.put(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const { errors, isValid } = validatePostInput(req.body);
-const user_id=req.user.id
+    const user_id = req.user.id;
     errors.notAuthorize = "User not authorized to edit other post";
     errors.nopost = "Post not found";
     errors.fail = "Update Failed";
 
-    
     if (!isValid) {
       return res.status(400).json(errors);
     } else {
       Post.findById(req.params.post_id).then((post) => {
         if (!post) {
-          res.status(400).json(errors.nopost);
+          res.status(404).json(errors.nopost);
         } else {
-        
-          if (post.user ==req.user.id) {
+          if (post.user == req.user.id) {
             if (req.body.brand) post.brand = req.body.brand;
             if (req.body.model) post.model = req.body.model;
             if (req.body.fuel) post.fuel = req.body.fuel;
