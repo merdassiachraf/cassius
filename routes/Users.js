@@ -41,7 +41,7 @@ router.post("/register", (req, res) => {
             password: req.body.password,
           });
           bycrypt.genSalt(10, (err, salt) => {
-            bycrypt.hash(newUser.password, salt, (err, hash) => {
+            bycrypt.hash(newUser.local.password, salt, (err, hash) => {
               if (err) throw err;
               newUser.password = hash;
               newUser
@@ -50,8 +50,7 @@ router.post("/register", (req, res) => {
                 .catch((err) => console.log(err));
             });
           });
-        }
-       else if (role === "Client") {
+        } else if (role === "Client") {
           const newUser = new User({
             name:
               req.body.lname.toUpperCase() +
@@ -73,8 +72,9 @@ router.post("/register", (req, res) => {
             });
           });
         } else {
-          errors.role="Wrong role, you nedd to choose between 'Agency' or 'Client'"
-          res.status(400).json(errors)
+          errors.role =
+            "Wrong role, you nedd to choose between 'Agency' or 'Client'";
+          res.status(400).json(errors);
         }
       }
     })
@@ -147,5 +147,17 @@ router.get(
     res.json(req.user);
   }
 );
+
+
+  
+
+router.route('/oauth/google')
+.post(passport.authenticate('googleToken',{session:false}))
+
+
+
+
+
+
 
 module.exports = router;
