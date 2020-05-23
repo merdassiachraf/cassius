@@ -15,8 +15,10 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const { errors } = validateReservationInput(req.body);
-
+    const success = {};
     role = req.user.role;
+
+    success.reservation = "Resservation has successfully created";
 
     {
       if (role === "Client") {
@@ -85,7 +87,7 @@ router.post(
                 });
                 newReservation
                   .save()
-                  .then((reservation) => res.json(reservation))
+                  .then((reservation) => res.json(success.reservation))
                   .catch((err) => res.status(404).json(err));
               }
             });
@@ -148,6 +150,10 @@ router.put(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const { errors, isValid } = validateReservationInput(req.body);
+    const success = {};
+
+    success.reservationedit = "Reservation has successfuly updated";
+
     errors.notAuthorize = "User not authorized to acces to others reservation";
     errors.noreservation = "Reservation not found";
     errors.fail = "Update Failed";
@@ -164,30 +170,31 @@ router.put(
           } else {
             if (req.user.role === "Client") {
               if (reservation.client == req.user.id) {
-                if (reservation.status !== "Canceled" && reservation.status !== "Confirmed") {
-                if (!req.body.status)
-                  return (reservation.status =
-                    "Changed and waiting for confirmation");
-                if (req.body.startDate)
-                  return (reservation.startDate = req.body.startDate);
-                if (req.body.returnDate)
-                  return (reservation.returnDate = req.body.returnDate);
-                if (req.body.totalDays)
-                  return (reservation.totalDays = req.body.totalDays);
-                if (req.body.totalPrice)
-                  return (reservation.totalPrice = req.body.totalPrice);
-                if (req.body.startTime)
-                  return (reservation.startTime = req.body.startTime);
-                if (req.body.returnDate)
-                  return (reservation.returnTime = req.body.returnTime);
-
-                reservation.save((err, updateReservation) => {
-                  if (err) {
-                    res.status(500).json(errors.fail);
-                  } else {
-                    res.json(updateReservation);
-                  }
-                });
+                if (
+                  reservation.status !== "Canceled" &&
+                  reservation.status !== "Confirmed"
+                ) {
+                  Reservation.update(
+                    { _id: req.params.reservation_id },
+                    {
+                      $set: {
+                        status: "Changed and waiting for confirmation",
+                        startDate: req.body.startDate,
+                        returnDate: req.body.returnDate,
+                        totalDays: req.body.totalDays,
+                        totalPrice: req.body.totalPrice,
+                        startTime: req.body.startTime,
+                        returnTime: req.body.returnTime,
+                      },
+                    },
+                    (err) => {
+                      if (err) {
+                        res.status(401).json(errors.fail);
+                      } else {
+                        res.json(success.reservationedit);
+                      }
+                    }
+                  );
                 } else {
                   res.status(500).json(errors.notwaiting);
                 }
@@ -205,7 +212,125 @@ router.put(
   }
 );
 
-// Get all reservation:
+// Confirm reservation:private
+
+router.put(
+  "/confirm/:reservation_id",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    const errors = {};
+    const success = {};
+
+    success.reservationconfirm = "Reservation confirmed";
+
+    errors.notAuthorize = "User not authorized to acces to others reservation";
+    errors.noreservation = "Reservation not found";
+    errors.fail = "Update Failed";
+    errors.notwaiting = "This reservation is confirmed or canceled";
+    errors.wrongRole = "Only Agency can already confirm reservation";
+
+    Reservation.findById(req.params.reservation_id)
+      .then((reservation) => {
+        if (!reservation) {
+          res.status(404).json(errors.noreservation);
+        } else {
+          if (req.user.role === "Agency") {
+            if (reservation.agency == req.user.id) {
+              if (
+                reservation.status !== "Canceled" &&
+                reservation.status !== "Confirmed"
+              ) {
+                Reservation.updateOne(
+                  { _id: req.params.reservation_id },
+                  {
+                    $set: {
+                      status: "Confirmed",
+                    },
+                  },
+                  (err) => {
+                    if (err) {
+                      res.status(401).json(errors.fail);
+                    } else {
+                      res.json(success.reservationconfirm);
+                    }
+                  }
+                );
+              } else {
+                res.status(500).json(errors.notwaiting);
+              }
+            } else {
+              res.json(errors.notAuthorize);
+            }
+          } else {
+            res.json(errors.wrongRole);
+          }
+        }
+      })
+      .then((reservation) => res.json(reservation))
+      .catch((err) => res.json(err));
+  }
+);
+
+//Canceled reservation:private
+
+router.put(
+  "/confirm/:reservation_id",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    const errors = {};
+    const success = {};
+
+    success.reservationconfirm = "Reservation confirmed";
+
+    errors.notAuthorize = "User not authorized to acces to others reservation";
+    errors.noreservation = "Reservation not found";
+    errors.fail = "Update Failed";
+    errors.notwaiting = "This reservation is confirmed or canceled";
+    errors.wrongRole = "Only Agency can already confirm reservation";
+
+    Reservation.findById(req.params.reservation_id)
+      .then((reservation) => {
+        if (!reservation) {
+          res.status(404).json(errors.noreservation);
+        } else {
+          if (req.user.role === "Agency") {
+            if (reservation.agency == req.user.id) {
+              if (
+                reservation.status !== "Canceled" &&
+                reservation.status !== "Confirmed"
+              ) {
+                Reservation.updateOne(
+                  { _id: req.params.reservation_id },
+                  {
+                    $set: {
+                      status: "Canceled",
+                    },
+                  },
+                  (err) => {
+                    if (err) {
+                      res.status(401).json(errors.fail);
+                    } else {
+                      res.json(success.reservationconfirm);
+                    }
+                  }
+                );
+              } else {
+                res.status(500).json(errors.notwaiting);
+              }
+            } else {
+              res.json(errors.notAuthorize);
+            }
+          } else {
+            res.json(errors.wrongRole);
+          }
+        }
+      })
+      .then((reservation) => res.json(reservation))
+      .catch((err) => res.json(err));
+  }
+);
+
+// Get all reservation:public
 
 router.get("/all", (req, res) => {
   Reservation.find()

@@ -7,6 +7,7 @@ const router = express.Router();
 const Profile = require("../models/Profile");
 const User = require("../models/User");
 const Post = require("../models/post");
+const Reservation = require('../models/reservation')
 
 //validation
 const validateProfileInput = require("../validation/profile");
@@ -116,14 +117,17 @@ router.get("/user/:user_id", (req, res) => {
     .catch((err) => res.status(404).json(err));
 });
 
-// post and update Profile
+// post and update Profile :private
 router.post(
   "/",
   passport.authenticate("jwt", { session: false }),
 
   (req, res) => {
-    let { isValid } = validateProfileInput(req.body);
-    const { errors } = validateProfileInput(req.body);
+    const { errors, isValid } = validateProfileInput(req.body);
+    const success = {};
+
+    success.createprofile = "you have successfully create your profile";
+    success.updateprofile = "Your profile has successfully Updated";
     role = req.user.role;
 
     if (role === "Agency") {
@@ -136,7 +140,6 @@ router.post(
         !errors.country
       ) {
         delete errors.dateOfBirth;
-        isValid = true;
       }
     }
     //Check Validation
@@ -182,7 +185,7 @@ router.post(
           { user: req.user.id },
           { $set: profileFields },
           { new: true }
-        ).then((profile) => res.json(profile));
+        ).then((profile) => res.json(success.updateprofile));
       } else {
         // Check if Handle exist
 
@@ -196,7 +199,7 @@ router.post(
 
           new Profile(profileFields)
             .save()
-            .then((profile) => res.json(profile));
+            .then((profile) => res.json(success.createprofile));
         });
       }
     });
@@ -210,6 +213,10 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const { errors, isValid } = validateAdressInput(req.body);
+    const success = {};
+
+    success.addcontactinfo =
+      "You have successfully add a contact information to your agency";
     role = req.user.role;
 
     if (!isValid) {
@@ -232,7 +239,7 @@ router.post(
           profile.contactInformation.push(newContactInformation);
           profile
             .save()
-            .then((profile) => res.json(profile))
+            .then((profile) => res.json(success.addcontactinfo))
             .catch((err) => res.json(err));
         } else {
           errors.wrongRole = "Only Agency can add an other contact information";
@@ -242,12 +249,62 @@ router.post(
   }
 );
 
+//Edit contact information with id : private
+router.put(
+  "/contact/edit/:contact_id",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    const { errors, isValid } = validateAdressInput(req.body);
+    const success = {};
+
+    contact_id = req.params.contact_id;
+
+    errors.noprofile = "Profile not found";
+    errors.fail = "Update Failed";
+    success.editcontactinfo = "Contact information has successfully edited";
+
+    if (!isValid) {
+      return res.status(400).json(errors);
+    } else {
+      Profile.findOne({ user: req.user.id }).then((profile) => {
+        if (!profile) {
+          res.status(404).json(errors.noprofile);
+        } else {
+          Profile.updateOne(
+            { "contactInformation._id": contact_id },
+            {
+              $set: {
+                "contactInformation.$.adress": req.body.adress,
+                "contactInformation.$.state": req.body.state,
+                "contactInformation.$.country": req.body.country,
+                "contactInformation.$.country": req.body.country,
+                "contactInformation.$.phoneNumber": req.body.phoneNumber,
+              },
+            },
+            (err) => {
+              if (err) {
+                res.status(401).json(errors.fail);
+              } else {
+                res.json(success.editcontactinfo);
+              }
+            }
+          );
+        }
+      });
+    }
+  }
+);
+
 // delete adress : private
 
 router.delete(
   "/contact/delete/:id",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
+    const success = {};
+
+    success.deletecontact = "Contact information has successfly deleted";
+   
     Profile.findOne({ user: req.user.id })
       .then((profile) => {
         const removeIndex = profile.contactInformation
@@ -256,7 +313,7 @@ router.delete(
 
         profile.contactInformation.splice(removeIndex, 1);
 
-        profile.save().then((profile) => res.json(profile));
+        profile.save().then((profile) => res.json(success.deletecontact));
       })
       .catch((err) => res.status(404).json(err));
   }
@@ -268,22 +325,36 @@ router.delete(
   "/delete",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
+    const success = {};
+    success.userdelete =
+      "Your Posts , Reservations and Profile deleted with succes ";
+
     Profile.findOneAndRemove({ user: req.user.id }).then(() => {
       Post.find({ user: req.user.id })
         .remove()
         .then(() => {
-          User.findOneAndRemove({ _id: req.user.id }).then(() => {
-            res.json({ success: "Profile deleted with succes " });
-          });
+          if (role === "Client") {
+            Reservation
+              .find({ client: req.user.id })
+              .remove()
+              .then(() => {
+                User.findOneAndRemove({ _id: req.user.id }).then(() => {
+                  res.json(success.userdelete);
+                });
+              });
+          }else{
+            Reservation
+              .find({ agency: req.user.id })
+              .remove()
+              .then(() => {
+                User.findOneAndRemove({ _id: req.user.id }).then(() => {
+                  res.json(success.userdelete);
+                });
+              });
+          }
         });
     });
   }
 );
-
-//Update profile
-router.put('edit/:user_id',passport.authenticate('jwt',{session:false}),(req,res)=>{
-
-})
-
 
 module.exports = router;

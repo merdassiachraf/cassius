@@ -17,8 +17,10 @@ router.get("/test", (req, res) => res.json({ msg: "user  works" }));
 
 //SingUp : public access
 
-router.post("/register", (req, res) => {
+router.post("/register/local", (req, res) => {
   const { errors, isValid } = validatorRegisterInput(req.body);
+  const success = {};
+  success.localuser = "You have successfuly regiter, now try to login";
 
   //Check validation
 
@@ -41,12 +43,12 @@ router.post("/register", (req, res) => {
             password: req.body.password,
           });
           bycrypt.genSalt(10, (err, salt) => {
-            bycrypt.hash(newUser.local.password, salt, (err, hash) => {
+            bycrypt.hash(newUser.password, salt, (err, hash) => {
               if (err) throw err;
               newUser.password = hash;
               newUser
                 .save()
-                .then((user) => res.json(user))
+                .then((user) => res.json(success.localuser))
                 .catch((err) => console.log(err));
             });
           });
@@ -67,7 +69,7 @@ router.post("/register", (req, res) => {
               newUser.password = hash;
               newUser
                 .save()
-                .then((user) => res.json(user))
+                .then((user) => res.json(success.localuser))
                 .catch((err) => console.log(err));
             });
           });
@@ -83,7 +85,7 @@ router.post("/register", (req, res) => {
 
 //SingIn : returning Token : public access
 
-router.post("/login", (req, res) => {
+router.post("/login/local", (req, res) => {
   const { errors, isValid } = validatorLoginInput(req.body);
 
   //Check validation
@@ -147,17 +149,5 @@ router.get(
     res.json(req.user);
   }
 );
-
-
-  
-
-router.route('/oauth/google')
-.post(passport.authenticate('googleToken',{session:false}))
-
-
-
-
-
-
 
 module.exports = router;

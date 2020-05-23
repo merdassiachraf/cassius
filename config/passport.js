@@ -5,15 +5,15 @@ const GooglePlusTokenStrategy = require("passport-google-plus-token");
 
 const User = require("../models/User");
 
-passport.serializeUser(function (user, done) {
-  done(null, user.id);
-});
+// passport.serializeUser(function (user, done) {
+//   done(null, user.id);
+// });
 
-passport.deserializeUser(function (id, done) {
-  User.findById(id, function (err, user) {
-    done(err, user);
-  });
-});
+// passport.deserializeUser(function (id, done) {
+//   User.findById(id, function (err, user) {
+//     done(err, user);
+//   });
+// });
 
 const opts = {};
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();

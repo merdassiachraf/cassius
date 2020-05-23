@@ -84,6 +84,9 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const { errors, isValid } = validatePostInput(req.body);
+    const success={}
+
+    success.post="Post successfully created"
 
     Profile.findOne({ user: req.user.id }).then((profile) => {
       if (!profile) {
@@ -115,7 +118,7 @@ router.post(
           });
           newPost
             .save()
-            .then((post) => res.json(post))
+            .then((post) => res.json(success.post))
             .catch((err) => res.status(404).json(err));
         } else {
           errors.post = "Only agencies can post !!!";
@@ -133,10 +136,14 @@ router.put(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const { errors, isValid } = validatePostInput(req.body);
-    const user_id = req.user.id;
+    const success = {};
+    
     errors.notAuthorize = "User not authorized to edit other post";
     errors.nopost = "Post not found";
     errors.fail = "Update Failed";
+
+    success.editpost = "Post has successfully edited";
+
 
     if (!isValid) {
       return res.status(400).json(errors);
@@ -145,23 +152,30 @@ router.put(
         if (!post) {
           res.status(404).json(errors.nopost);
         } else {
+  
           if (post.user == req.user.id) {
-            if (req.body.brand) return (post.brand = req.body.brand);
-            if (req.body.model) return (post.model = req.body.model);
-            if (req.body.fuel) return (post.fuel = req.body.fuel);
-            if (req.body.transmission)
-              return (post.transmission = req.body.transmission);
-            if (req.body.pricePerDay)
-              return (post.pricePerDay = req.body.pricePerDay + " dt/day");
-            if (req.body.state) return (post.state = req.body.state);
-            if (req.body.country) return (post.country = req.body.country);
-            post.save((err, updatePost) => {
-              if (err) {
-                res.status(500).json(errors.fail);
-              } else {
-                res.json(updatePost);
+            Post.updateOne(
+              { _id: req.params.post_id },
+              {
+                $set: {
+                  brand: req.body.brand,
+                  model: req.body.model,
+                  fuel: req.body.fuel,
+                  transmission: req.body.transmission,
+                  pricePerDay: req.body.pricePerDay,
+                  state: req.body.state,
+                  country: req.body.country,
+                },
+              },
+              (err) => {
+                if (err) {
+                  res.status(401).json(errors.fail);
+                } else {
+                  res.json(success.editpost);
+                }
               }
-            });
+            );
+           
           } else {
             res.json(errors.notAuthorize);
           }
@@ -179,9 +193,13 @@ router.delete(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const { errors } = validatePostInput(req.body);
+    const success = {};
+
     errors.nopost = "Post not found";
     errors.notAuthorize = "User not authorized";
-    errorspostnotfound = "No post found";
+    errors.postnotfound = "No post found";
+
+    success.deletepost="Post has successfly deleted"
 
     Profile.findOne({ user: req.user.id }).then((profile) => {
       Post.findById(req.params.id).then((post) => {
@@ -194,7 +212,7 @@ router.delete(
             post
               .remove()
               .then((post) => {
-                res.json({ sucess: true });
+                res.json(success.deletepost );
               })
               .catch((err) => res.status(404).json(errors.postnotfound));
           }
