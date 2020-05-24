@@ -7,7 +7,7 @@ const router = express.Router();
 const Profile = require("../models/Profile");
 const User = require("../models/User");
 const Post = require("../models/post");
-const Reservation = require('../models/reservation')
+const Reservation = require("../models/reservation");
 
 //validation
 const validateProfileInput = require("../validation/profile");
@@ -130,21 +130,8 @@ router.post(
     success.updateprofile = "Your profile has successfully Updated";
     role = req.user.role;
 
-    if (role === "Agency") {
-      if (
-        !errors.handle &&
-        !errors.phoneNumber &&
-        !errors.countryCode &&
-        !errors.adress &&
-        !errors.state &&
-        !errors.country
-      ) {
-        delete errors.dateOfBirth;
-      }
-    }
     //Check Validation
     if (!isValid) {
-      //return any erros with 400 status
       return res.status(400).json(errors);
     }
 
@@ -185,7 +172,7 @@ router.post(
           { user: req.user.id },
           { $set: profileFields },
           { new: true }
-        ).then((profile) => res.json(success.updateprofile));
+        ).then((profile) => res.json(profile));
       } else {
         // Check if Handle exist
 
@@ -199,7 +186,7 @@ router.post(
 
           new Profile(profileFields)
             .save()
-            .then((profile) => res.json(success.createprofile));
+            .then((profile) => res.json(profile));
         });
       }
     });
@@ -304,7 +291,7 @@ router.delete(
     const success = {};
 
     success.deletecontact = "Contact information has successfly deleted";
-   
+
     Profile.findOne({ user: req.user.id })
       .then((profile) => {
         const removeIndex = profile.contactInformation
@@ -334,17 +321,15 @@ router.delete(
         .remove()
         .then(() => {
           if (role === "Client") {
-            Reservation
-              .find({ client: req.user.id })
+            Reservation.find({ client: req.user.id })
               .remove()
               .then(() => {
                 User.findOneAndRemove({ _id: req.user.id }).then(() => {
                   res.json(success.userdelete);
                 });
               });
-          }else{
-            Reservation
-              .find({ agency: req.user.id })
+          } else {
+            Reservation.find({ agency: req.user.id })
               .remove()
               .then(() => {
                 User.findOneAndRemove({ _id: req.user.id }).then(() => {

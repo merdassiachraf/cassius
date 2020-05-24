@@ -21,9 +21,10 @@ module.exports = function validateProfileInput(data) {
   if (Validator.isEmpty(data.handle)) {
     errors.handle = "Profile handle is required";
   }
-  
-  if (Validator.isEmpty(data.dateOfBirth)) {
-    errors.dateOfBirth = "Birth date handle is required";
+  if (data.role === "Client") {
+    if (Validator.isEmpty(data.dateOfBirth)) {
+      errors.dateOfBirth = "Birth date handle is required";
+    }
   }
 
   if (!isEmpty(data.youtube)) {

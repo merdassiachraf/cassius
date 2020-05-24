@@ -48,7 +48,7 @@ router.post("/register/local", (req, res) => {
               newUser.password = hash;
               newUser
                 .save()
-                .then((user) => res.json(success.localuser))
+                .then((user) => res.json(success))
                 .catch((err) => console.log(err));
             });
           });
