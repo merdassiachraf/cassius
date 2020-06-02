@@ -274,7 +274,7 @@ router.put(
 //Canceled reservation:private
 
 router.put(
-  "/confirm/:reservation_id",
+  "/cancel/:reservation_id",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const errors = {};
