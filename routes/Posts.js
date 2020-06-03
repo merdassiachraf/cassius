@@ -38,17 +38,17 @@ router.get("/post/:id", (req, res) => {
 
 //Get an agency posts :public
 
-router.get("/agencies_posts/:user_id", (req, res) => {
+router.get("/agencies_posts/:handle", (req, res) => {
   const { errors } = validatePostInput(req.body);
   errors.noposts = "There is no posts";
   errors.noprofile = "Profile not found";
 
-  Profile.find({ user: req.params.user_id })
+  Profile.find({ handle: req.params.handle })
     .then((profile) => {
       if (!profile) {
         res.status(404).json(errors.noprofile);
       } else {
-        Post.find({ user: req.params.user_id }).then((post) => {
+        Post.find({ handle: req.params.handle }).then((post) => {
           if (!post) {
             res.status(404).json(errors.noposts);
           } else {
@@ -84,9 +84,9 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const { errors, isValid } = validatePostInput(req.body);
-    const success={}
+    const success = {};
 
-    success.post="Post successfully created"
+    success.post = "Post successfully created";
 
     Profile.findOne({ user: req.user.id }).then((profile) => {
       if (!profile) {
@@ -94,12 +94,6 @@ router.post(
         res.status(404).json(errors.profile);
       } else {
         if (req.user.role === "Agency") {
-          adress = profile.adress;
-          state = profile.state;
-          country = profile.country;
-          countryCode = profile.countryCode;
-          phoneNumber = profile.phoneNumber;
-          handle = profile.handle;
           const newPost = new Post({
             name: req.user.name,
             user: req.user.id,
@@ -108,13 +102,13 @@ router.post(
             fuel: req.body.fuel,
             transmission: req.body.transmission,
             pricePerDay: req.body.pricePerDay + " dt/day",
-            adress,
-            state,
-            country,
-            countryCode,
-            phoneNumber,
+            adress: req.body.adress,
+            state: req.body.state,
+            country: req.body.country,
+            countryCode: req.body.countryCode,
+            phoneNumber: req.body.phoneNumber,
             email: req.user.email,
-            handle,
+            handle: req.user.handle,
           });
           newPost
             .save()
@@ -137,13 +131,12 @@ router.put(
   (req, res) => {
     const { errors, isValid } = validatePostInput(req.body);
     const success = {};
-    
+
     errors.notAuthorize = "User not authorized to edit other post";
     errors.nopost = "Post not found";
     errors.fail = "Update Failed";
 
     success.editpost = "Post has successfully edited";
-
 
     if (!isValid) {
       return res.status(400).json(errors);
@@ -152,7 +145,6 @@ router.put(
         if (!post) {
           res.status(404).json(errors.nopost);
         } else {
-  
           if (post.user == req.user.id) {
             Post.updateOne(
               { _id: req.params.post_id },
@@ -175,7 +167,6 @@ router.put(
                 }
               }
             );
-           
           } else {
             res.json(errors.notAuthorize);
           }
@@ -184,7 +175,6 @@ router.put(
     }
   }
 );
-
 
 //Delete post : id /private
 
@@ -199,7 +189,7 @@ router.delete(
     errors.notAuthorize = "User not authorized";
     errors.postnotfound = "No post found";
 
-    success.deletepost="Post has successfly deleted"
+    success.deletepost = "Post has successfly deleted";
 
     Profile.findOne({ user: req.user.id }).then((profile) => {
       Post.findById(req.params.id).then((post) => {
@@ -212,7 +202,7 @@ router.delete(
             post
               .remove()
               .then((post) => {
-                res.json(success.deletepost );
+                res.json(success.deletepost);
               })
               .catch((err) => res.status(404).json(errors.postnotfound));
           }

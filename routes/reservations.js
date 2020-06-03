@@ -425,7 +425,7 @@ router.get(
   }
 );
 
-// Get canceled reservation: private
+// Get waitting reservation: private
 
 router.get(
   "/user/waiting",
@@ -437,33 +437,21 @@ router.get(
       if (role === "Client") {
         Reservation.find({
           client: req.user.id,
-          status:
-            "Changed and waiting for confirmation" ||
-            "Waiting for confirmation",
+          status: "Changed and waiting for confirmation",
+          status: "Waiting for confirmation",
         })
           .then((reservation) => res.json(reservation))
           .catch((err) => res.json(err));
       } else {
         Reservation.find({
           agency: req.user.id,
-          status:
-            "Changed and waiting for confirmation" ||
-            "Waiting for confirmation",
+          status: "Changed and waiting for confirmation",
+          status: "Waiting for confirmation",
         })
           .then((reservation) => res.json(reservation))
           .catch((err) => res.json(err));
       }
     }
-  }
-);
-
-//Confirmed reservation
-
-router.put(
-  "/:reservation_id",
-  passport.authenticate("jwt", { session: false }),
-  (req, res) => {
-    Reservation.findOne({});
   }
 );
 

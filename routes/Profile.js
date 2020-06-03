@@ -238,13 +238,13 @@ router.post(
 
 //Edit contact information with id : private
 router.put(
-  "/contact/edit/:id",
+  "/contact/edit/id",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const { errors, isValid } = validateAdressInput(req.body);
     const success = {};
 
-    contact_id = req.params.id;
+    contact_id = req.params.contact_id;
 
     errors.noprofile = "Profile not found";
     errors.fail = "Update Failed";
